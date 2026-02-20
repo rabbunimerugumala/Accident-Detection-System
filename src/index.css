@@ -1,73 +1,99 @@
 @import "tailwindcss";
 
 @theme {
-  --color-safety: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #f97316;
+  /* Light Mode Defaults (Base) */
+  --color-background: #f5f7fa;
+  --color-foreground: #111827;
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-heading: #0a0a0a;
+
+  /* Severity Colors - Light Mode/Global */
+  --color-safety: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #fb923c;
   --color-critical: #ef4444;
-  --color-accent: #0ea5e9;
+  --color-accent: #3b82f6;
+
+  --shadow-hazard: 0 0 20px rgba(239, 68, 68, 0.4);
+  --shadow-glow: 0 0 15px currentColor;
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-shake: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+  --animate-crash-pulse: crash-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@layer base {
-  :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-  }
+/* Dark mode theme variables */
+.dark {
+  --color-background: #0b1120;
+  --color-foreground: #e5e7eb;
+  --color-card: #111827;
+  --color-card-foreground: #e5e7eb;
+  --color-border: #1e293b;
+  --color-input: #1e293b;
+  --color-heading: #f8fafc;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+  /* Severity Colors - Dark Mode (Same tokens, unified style) */
+  --color-safety: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #fb923c;
+  --color-critical: #ef4444;
+
+  --shadow-hazard: 0 0 20px rgba(239, 68, 68, 0.4);
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    @apply transition-colors duration-300;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-heading);
   }
 }
 
 @utility glass {
-  @apply bg-white/10 backdrop-blur-md border border-white/20;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  .dark & {
+    background-color: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
 }
 
-@utility card-gradient {
-  @apply bg-gradient-to-br from-card to-card/90;
+@utility glow-border {
+  border-width: 1px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-@utility hazard-glow-critical {
-  @apply shadow-[0_0_15px_rgba(239, 68, 68, 0.5)] border-critical;
-}
-
-/* Animations */
-@keyframes shake {
+@keyframes crash-pulse {
 
   0%,
   100% {
-    transform: translateX(0);
+    opacity: 1;
+    transform: scale(1);
+    background-color: rgba(239, 68, 68, 0.1);
   }
 
-  25% {
-    transform: translateX(-5px);
-  }
-
-  75% {
-    transform: translateX(5px);
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+    background-color: rgba(239, 68, 68, 0.3);
   }
 }
