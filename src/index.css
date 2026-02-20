@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-safety: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #f97316;
+  --color-critical: #ef4444;
+  --color-accent: #0ea5e9;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-shake: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+}
+
+@utility glass {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}
+
+@utility card-gradient {
+  @apply bg-gradient-to-br from-card to-card/90;
+}
+
+@utility hazard-glow-critical {
+  @apply shadow-[0_0_15px_rgba(239, 68, 68, 0.5)] border-critical;
+}
+
+/* Animations */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
