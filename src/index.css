@@ -1,99 +1,169 @@
 @import "tailwindcss";
 
 @theme {
-  /* Light Mode Defaults (Base) */
-  --color-background: #f5f7fa;
-  --color-foreground: #111827;
-  --color-card: #ffffff;
-  --color-card-foreground: #111827;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-heading: #0a0a0a;
+  --color-background: #f8fafc;
+  --color-foreground: #020617;
+  --color-card: rgba(255, 255, 255, 0.7);
+  --color-border: rgba(226, 232, 240, 0.8);
+  --color-muted-foreground: #64748b;
+  --color-accent: #2563eb;
+  --color-heading: #0f172a;
 
-  /* Severity Colors - Light Mode/Global */
-  --color-safety: #4ade80;
-  --color-warning: #facc15;
-  --color-danger: #fb923c;
+  /* Premium Cyber Colors - Light */
+  --color-safe: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #f97316;
   --color-critical: #ef4444;
-  --color-accent: #3b82f6;
 
-  --shadow-hazard: 0 0 20px rgba(239, 68, 68, 0.4);
-  --shadow-glow: 0 0 15px currentColor;
+  --font-sans: "Outfit", "Inter", sans-serif;
 
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-crash-pulse: crash-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* Custom Shadows for Glassmorphism */
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-glass-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --shadow-premium-hover: 0 20px 50px rgba(0, 0, 0, 0.1);
+  --shadow-premium-hover-dark: 0 20px 50px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 10px rgba(239, 68, 68, 0.5);
+  --shadow-glow-safe: 0 0 20px -5px rgba(16, 185, 129, 0.15);
+  --shadow-glow-warning: 0 0 20px -5px rgba(245, 158, 11, 0.15);
+  --shadow-glow-danger: 0 0 20px -5px rgba(249, 115, 22, 0.15);
+  --shadow-glow-critical: 0 0 30px -5px rgba(239, 68, 68, 0.3);
+  --shadow-hazard: 0 0 30px -5px rgba(239, 68, 68, 0.4);
 }
 
-/* Dark mode theme variables */
 .dark {
-  --color-background: #0b1120;
-  --color-foreground: #e5e7eb;
-  --color-card: #111827;
-  --color-card-foreground: #e5e7eb;
-  --color-border: #1e293b;
-  --color-input: #1e293b;
-  --color-heading: #f8fafc;
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-card: rgba(15, 23, 42, 0.7);
+  --color-border: rgba(30, 41, 59, 0.8);
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #3b82f6;
+  --color-heading: #ffffff;
 
-  /* Severity Colors - Dark Mode (Same tokens, unified style) */
-  --color-safety: #4ade80;
-  --color-warning: #facc15;
+  /* Premium Cyber Colors - Dark */
+  --color-safe: #34d399;
+  --color-warning: #fbbf24;
   --color-danger: #fb923c;
-  --color-critical: #ef4444;
+  --color-critical: #f87171;
 
-  --shadow-hazard: 0 0 20px rgba(239, 68, 68, 0.4);
+  /* Dark mode glow overrides */
+  --shadow-glow-safe: 0 0 25px -5px rgba(52, 211, 153, 0.2);
+  --shadow-glow-warning: 0 0 25px -5px rgba(251, 191, 36, 0.2);
+  --shadow-glow-danger: 0 0 25px -5px rgba(251, 146, 60, 0.2);
+  --shadow-glow-critical: 0 0 40px -5px rgba(248, 113, 113, 0.4);
+  --shadow-hazard: 0 0 40px -5px rgba(248, 113, 113, 0.5);
 }
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    @apply border-border;
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    @apply transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-700 font-sans antialiased selection:bg-accent/20;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(239, 68, 68, 0.03) 0%, transparent 50%);
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: var(--color-heading);
+  .dark body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.07) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(239, 68, 68, 0.07) 0%, transparent 50%);
   }
 }
 
-@utility glass {
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+@layer components {
 
-  .dark & {
-    background-color: rgba(17, 24, 39, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  .glass,
+  .premium-card {
+    @apply backdrop-blur-2xl border border-white/20 dark:border-white/5 shadow-glass dark:shadow-glass-dark;
+    background: var(--color-card);
+  }
+
+  .premium-card {
+    @apply rounded-[2rem] p-6 transition-all duration-500 hover:shadow-premium-hover dark:hover:shadow-premium-hover-dark hover:-translate-y-1;
+  }
+
+  /* Hazard Glows - Managed via Theme, but keeping classes for semantic use if needed */
+  .glow-safe {
+    @apply shadow-glow-safe;
+  }
+
+  .glow-warning {
+    @apply shadow-glow-warning;
+  }
+
+  .glow-danger {
+    @apply shadow-glow-danger;
+  }
+
+  .glow-critical {
+    @apply shadow-glow-critical;
+  }
+
+
+
+  .animate-pulse-soft {
+    animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Technical Grid Background for Cards */
+  .tech-grid {
+    background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }
 
-@utility glow-border {
-  border-width: 1px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-@keyframes crash-pulse {
+@keyframes pulse-soft {
 
   0%,
   100% {
     opacity: 1;
     transform: scale(1);
-    background-color: rgba(239, 68, 68, 0.1);
   }
 
   50% {
     opacity: 0.8;
     transform: scale(1.02);
-    background-color: rgba(239, 68, 68, 0.3);
   }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-accent), transparent);
+  opacity: 0.1;
+  animation: scanline 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-accent/20 rounded-full hover:bg-accent/40 transition-colors;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 }

@@ -1,62 +1,96 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SensorCardProps {
     icon: LucideIcon;
     label: string;
     value: string | number;
-    status: string;
+    unit?: string;
     severity: 'SAFE' | 'WARNING' | 'DANGER' | 'CRITICAL';
     isOnline: boolean;
+    color: string;
 }
 
-export const SensorCard: React.FC<SensorCardProps> = ({ icon: Icon, label, value, status, severity, isOnline }) => {
-    // Severity color mapping based on unified variables
-    const colorMap = {
-        SAFE: 'text-safety border-safety/30 shadow-safety/10',
-        WARNING: 'text-warning border-warning/30 shadow-warning/10',
-        DANGER: 'text-danger border-danger/30 shadow-danger/10',
-        CRITICAL: 'text-critical border-critical/30 shadow-critical/10',
+export const SensorCard: React.FC<SensorCardProps> = ({ icon: Icon, label, value, unit, severity, isOnline, color }) => {
+
+    const severityStyles = {
+        SAFE: 'border-safe/20 bg-safe/[0.03] dark:bg-safe/5 glow-safe',
+        WARNING: 'border-warning/30 bg-warning/[0.03] dark:bg-warning/5 glow-warning',
+        DANGER: 'border-danger/30 bg-danger/[0.03] dark:bg-danger/5 glow-danger',
+        CRITICAL: 'border-critical/40 bg-critical/[0.03] dark:bg-critical/5 glow-critical shadow-hazard',
     };
 
-    const bgMap = {
-        SAFE: 'bg-safety/5 dark:bg-safety/10',
-        WARNING: 'bg-warning/5 dark:bg-warning/10',
-        DANGER: 'bg-danger/5 dark:bg-danger/10',
-        CRITICAL: 'bg-critical/5 dark:bg-critical/10',
-    };
-
-    const activeSeverity = isOnline ? (severity || 'SAFE') : 'SAFE';
-    const activeColor = colorMap[activeSeverity as keyof typeof colorMap];
-    const activeBg = bgMap[activeSeverity as keyof typeof bgMap];
+    const activeSeverity = isOnline ? severity : 'SAFE';
+    const styleClass = severityStyles[activeSeverity];
 
     return (
-        <div className={`glass rounded-2xl p-4 md:p-5 border-2 glow-border ${activeColor} ${activeBg} transition-all duration-300 group hover:scale-[1.03] shadow-lg`}>
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-2.5 rounded-xl border-2 ${activeColor} bg-background/50 backdrop-blur-sm shadow-sm`}>
-                    <Icon className="w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${activeColor} bg-background/50`}>
-                    {isOnline ? status : 'OFFLINE'}
-                </div>
-            </div>
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`premium-card group relative overflow-hidden ${styleClass}`}
+        >
+            <div className="absolute inset-0 tech-grid opacity-[0.03] pointer-events-none" />
 
-            <div className="space-y-1">
-                <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-1">{label}</p>
-                <p className="text-xl md:text-2xl font-black tracking-tight text-heading truncate dark:text-white">
-                    {isOnline ? value : '0'}
-                </p>
-            </div>
-
-            <div className="mt-5 w-full bg-foreground/5 h-1.5 rounded-full overflow-hidden border border-border/10">
+            <div className="relative z-10 flex justify-between items-start mb-6">
                 <div
-                    className={`h-full opacity-80 ${activeColor.split(' ')[0].replace('text-', 'bg-')}`}
+                    className="p-3.5 rounded-2xl bg-foreground/5 border border-border/50 backdrop-blur-md shadow-inner transition-colors duration-500"
+                    style={{ color: isOnline ? color : 'var(--color-muted-foreground)' }}
+                >
+                    <Icon className="w-6 h-6" />
+                </div>
+                {isOnline && (
+                    <div className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border backdrop-blur-sm transition-all duration-500`}
+                        style={{
+                            borderColor: color,
+                            color: color,
+                            backgroundColor: `${color}15`
+                        }}>
+                        {severity}
+                    </div>
+                )}
+            </div>
+
+            <div className="relative z-10 space-y-2">
+                <p className="text-muted-foreground text-[11px] font-black uppercase tracking-[0.3em] mb-2">{label}</p>
+                <div className="flex items-baseline gap-2">
+                    <AnimatePresence mode="wait">
+                        <motion.p
+                            key={value}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }}
+                            className="text-3xl md:text-5xl font-black tracking-tighter text-heading drop-shadow-sm"
+                        >
+                            {isOnline ? value : '0'}
+                        </motion.p>
+                    </AnimatePresence>
+                    {unit && isOnline && (
+                        <span className="text-sm font-black text-muted-foreground/60 uppercase tracking-widest">{unit}</span>
+                    )}
+                </div>
+            </div>
+
+            <div className="mt-8 relative h-1.5 w-full bg-foreground/[0.03] rounded-full overflow-hidden border border-border/10">
+                <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full"
                     style={{
-                        width: !isOnline ? '0%' : (activeSeverity === 'SAFE' ? '100%' : activeSeverity === 'WARNING' ? '60%' : activeSeverity === 'DANGER' ? '35%' : '15%'),
-                        transition: 'width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        background: `linear-gradient(to right, ${color}40, ${color})`,
+                        boxShadow: `0 0 10px ${color}80`
                     }}
+                    initial={{ width: 0 }}
+                    animate={{
+                        width: !isOnline ? '0%' : (severity === 'SAFE' ? '100%' : severity === 'WARNING' ? '60%' : severity === 'DANGER' ? '35%' : '15%')
+                    }}
+                    transition={{ type: "spring", stiffness: 40, damping: 15 }}
                 />
             </div>
-        </div>
+
+            {/* Background Decorative Alpha Label */}
+            <div className="absolute right-[-10px] bottom-[-10px] text-5xl font-black italic opacity-[0.02] select-none pointer-events-none group-hover:opacity-[0.05] transition-opacity uppercase">
+                {label.split(' ')[0]}
+            </div>
+        </motion.div>
     );
 };

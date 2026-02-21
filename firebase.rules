@@ -1,0 +1,8 @@
+{
+  "rules": {
+    ".read": true,
+    "accidents": {
+      ".write": "auth != null"
+    }
+  }
+}
