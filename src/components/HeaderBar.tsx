@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 
 interface HeaderBarProps {
     isOnline: boolean;
@@ -30,8 +30,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ isOnline, vehicleId, isDar
     return (
         <header className="sticky top-0 z-50 w-full glass border-b px-4 py-3 md:px-8 flex items-center justify-between transition-all duration-500">
             <div className="flex items-center gap-2 md:gap-3">
-                <div className="bg-critical/10 p-2 rounded-xl">
-                    <ShieldCheck className="text-critical w-6 h-6 md:w-7 md:h-7" />
+                <div className="bg-critical/10 p-1.5 rounded-xl">
+                    <img src="/heartbeat.png" alt="LifeGuardX Logo" className="w-7 h-7 md:w-8 md:h-8 object-contain" />
                 </div>
                 <div>
                     <h1 className="text-lg md:text-xl font-black tracking-tighter uppercase italic text-heading">
