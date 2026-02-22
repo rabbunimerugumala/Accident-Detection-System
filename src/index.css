@@ -1,81 +1,198 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #2563eb;
-    --color-success: #10b981;
+    --color-primary: #3b82f6;
+    --color-success: #22c55e;
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
-    --color-background: #f8fafc;
-    --color-card: #ffffff;
-    --color-text: #1e293b;
+    --color-background: #0f172a;
+    --color-card: #1e293b;
+    --color-text-main: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-border: rgba(255, 255, 255, 0.1);
 
-    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
+    :root {
+        /* Pro Theme - Dark Default */
+        --bg-main: #020617;
+        --bg-card: rgba(15, 23, 42, 0.4);
+        --bg-header: rgba(2, 6, 23, 0.85);
+
+        --text-main: #f8fafc;
+        --text-secondary: #94a3b8;
+        --text-muted: #475569;
+        --text-dim: #1e293b;
+
+        --border-color: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(59, 130, 246, 0.4);
+
+        --accent-emerald: #10b981;
+        --accent-blue: #3b82f6;
+        --accent-amber: #f59e0b;
+        --accent-rose: #f43f5e;
+        --accent-indigo: #6366f1;
+        --accent-cyan: #06b6d4;
+
+        --glass-blur: blur(16px);
+        --neon-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .light {
+        --bg-main: #f1f5f9;
+        --bg-card: rgba(255, 255, 255, 0.8);
+        --bg-header: rgba(255, 255, 255, 0.9);
+
+        --text-main: #0f172a;
+        --text-secondary: #334155;
+        --text-muted: #64748b;
+        --text-dim: #94a3b8;
+
+        --border-color: rgba(15, 23, 42, 0.1);
+        --border-hover: rgba(37, 99, 235, 0.3);
+
+        --accent-emerald: #15803d;
+        --accent-blue: #1d4ed8;
+        --accent-amber: #b45309;
+        --accent-rose: #be123c;
+        --accent-indigo: #4338ca;
+        --accent-cyan: #0e7490;
+
+        --neon-glow: 0 0 15px rgba(37, 99, 235, 0.2);
+    }
+
     body {
-        @apply bg-background text-text font-sans;
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        @apply font-sans antialiased transition-colors duration-500;
+        background-image:
+            radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 40%),
+            radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+        background-attachment: fixed;
     }
 }
 
 @layer components {
-    .dashboard-card {
-        @apply bg-card border border-slate-200/60 rounded-2xl p-6 shadow-sm transition-all duration-300;
+    .glass-card {
+        background-color: var(--bg-card);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-color);
+        @apply rounded-3xl p-6 transition-all duration-300;
     }
 
-    .status-label {
-        @apply text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1;
+    .glass-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
     }
 
-    .sensor-value {
-        @apply text-lg font-black text-text;
+    .neon-pulse {
+        @apply relative origin-center;
+    }
+
+    .neon-pulse::after {
+        content: '';
+        @apply absolute inset-0 rounded-full opacity-50 blur-md animate-pulse;
+        background: currentColor;
+    }
+
+    .label-pro {
+        color: var(--text-muted);
+        @apply text-[10px] font-extrabold uppercase tracking-[0.2em] mb-1.5 block;
+    }
+
+    .value-pro {
+        @apply text-4xl lg:text-5xl font-black tracking-tighter leading-none;
+    }
+
+    .progress-track {
+        @apply w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800/50 overflow-hidden relative;
+    }
+
+    .progress-fill {
+        @apply h-full rounded-full transition-all duration-700 ease-out;
+    }
+
+    .icon-container {
+        @apply p-4 rounded-3xl transition-all duration-500 flex items-center justify-center;
+        background: var(--bg-main);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 }
 
-/* Custom Status Animations */
-@keyframes pulse-green {
+/* Custom Animations */
+@keyframes gradient {
     0% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        background-position: 0% 50%;
     }
 
-    70% {
-        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    50% {
+        background-position: 100% 50%;
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        background-position: 0% 50%;
     }
 }
 
-.animate-pulse-green {
-    animation: pulse-green 2s infinite;
-}
-
-@keyframes shake {
-
-    10%,
-    90% {
-        transform: translate3d(-1px, 0, 0);
+@keyframes slow-spin {
+    from {
+        transform: rotate(0deg);
     }
 
-    20%,
-    80% {
-        transform: translate3d(2px, 0, 0);
-    }
-
-    30%,
-    50%,
-    70% {
-        transform: translate3d(-4px, 0, 0);
-    }
-
-    40%,
-    60% {
-        transform: translate3d(4px, 0, 0);
+    to {
+        transform: rotate(360deg);
     }
 }
 
-.animate-shake {
-    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+.animate-slow-spin {
+    animation: slow-spin 10s linear infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Recharts Customization */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+    stroke: var(--border-color);
+}
+
+.recharts-text {
+    fill: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-500/20 rounded-full hover:bg-slate-500/40;
 }

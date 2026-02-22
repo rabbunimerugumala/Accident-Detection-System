@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import toast, { Toaster } from 'react-hot-toast';
 import { FirebaseData } from './types';
 
 // Modular Components
 import Header from './components/Header';
 import EmergencyBanner from './components/EmergencyBanner';
-import StatusCards from './components/StatusCards';
 import SensorGrid from './components/SensorGrid';
 import MapDisplay from './components/MapDisplay';
 import Footer from './components/Footer';
 
-const FIREBASE_URL = "https://accident-detection-syste-f7f23-default-rtdb.firebaseio.com/accidentState.json";
+// Firebase Config (Derived from URL provided)
+const firebaseConfig = {
+    databaseURL: "https://accident-detection-syste-f7f23-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 const INITIAL_STATE: FirebaseData['accidentState'] = {
     accident: { detected: false, severity: "SAFE" },
@@ -30,108 +38,204 @@ const INITIAL_STATE: FirebaseData['accidentState'] = {
     vehicle_id: "VEHICLE_01"
 };
 
+// Custom Hook to track previous values
+function usePrevious<T>(value: T): T | undefined {
+    const ref = useRef<T>(undefined);
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref.current;
+}
+
 const App: React.FC = () => {
     const [data, setData] = useState<FirebaseData['accidentState']>(INITIAL_STATE);
-    const [status, setStatus] = useState("🔴 CONNECTING...");
+    const [status, setStatus] = useState("CONNECTING...");
     const [age, setAge] = useState(0);
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('theme');
+            return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        }
+        return true; // Default to dark for Pro version
+    });
 
-    // Heartbeat logic: if timestamp hasn't changed for 10s, it's offline
+    const prevData = usePrevious(data);
     const lastSeenRef = useRef<{ ts: number, lastAdvance: number }>({ ts: -1, lastAdvance: Date.now() });
 
+    // Theme Management
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(FIREBASE_URL);
-                const firebaseData: any = await response.json();
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [isDark]);
 
-                if (firebaseData) {
-                    // Handle double nesting check: root -> accidentState -> accidentState
-                    const state = firebaseData.accidentState?.accidentState || firebaseData.accidentState || firebaseData;
+    // Browser Notification Permission
+    useEffect(() => {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }, []);
 
-                    if (state && typeof state === 'object' && 'timestamp' in state) {
-                        const now = Date.now();
-                        const rawTimestamp = state.timestamp;
+    // Firebase Realtime Listener
+    useEffect(() => {
+        const accidentRef = ref(db, 'accidentState');
 
-                        // Heartbeat Tracking
-                        if (rawTimestamp !== lastSeenRef.current.ts) {
-                            lastSeenRef.current = { ts: rawTimestamp, lastAdvance: now };
-                            console.log(`📡 [SYNC] Received NEW packet | TS: ${rawTimestamp} | Lat: ${state.location.latitude}`);
-                        }
+        const unsubscribe = onValue(accidentRef, (snapshot) => {
+            const rawData = snapshot.val();
+            if (rawData) {
+                // Double nesting check
+                const state = rawData.accidentState || rawData;
 
-                        const timeSinceLastAdvance = (now - lastSeenRef.current.lastAdvance) / 1000;
-                        const isUnix = rawTimestamp > 1000000000;
-                        const espTimestamp = rawTimestamp * 1000;
+                if (state && typeof state === 'object' && 'timestamp' in state) {
+                    setData(state);
+                    setStatus("ONLINE");
 
-                        let ageSeconds = 0;
-                        // OFFLINE if stagnant for 10s (User requested 10s)
-                        const HEARTBEAT_TIMEOUT = 10;
-                        // User wants purely timestamp-based detection: ignore state.online
-                        let isFresh = timeSinceLastAdvance < HEARTBEAT_TIMEOUT;
-
-                        if (isUnix) {
-                            ageSeconds = Math.round((now - espTimestamp) / 1000);
-                            isFresh = isFresh && ageSeconds < HEARTBEAT_TIMEOUT;
-                        } else {
-                            ageSeconds = Math.round(timeSinceLastAdvance);
-                        }
-
-                        setAge(ageSeconds);
-                        setData(state);
-
-                        // Detailed debug info stays in console
-                        if (isFresh) {
-                            if (timeSinceLastAdvance > 2) {
-                                console.warn(`⏳ [HEARTBEAT] Idle for ${Math.round(timeSinceLastAdvance)}s... (Timeout at 10s)`);
-                            } else {
-                                console.log(`🟢 [ACTIVE] Connection healthy | Age: ${ageSeconds}s`);
-                            }
-                        } else {
-                            console.error(`🔴 [OFFLINE] 10s threshold reached | Idle for ${Math.round(timeSinceLastAdvance)}s`);
-                        }
-
-                        console.log(`📊 [STATE] Status: ${isFresh ? 'ONLINE' : 'OFFLINE'} | Packet Age: ${ageSeconds}s | Stale: ${Math.round(timeSinceLastAdvance)}s`);
+                    const now = Date.now();
+                    if (state.timestamp !== lastSeenRef.current.ts) {
+                        lastSeenRef.current = { ts: state.timestamp, lastAdvance: now };
                     }
                 }
-            } catch (error) {
-                console.error("❌ Firebase fetch error:", error);
-                setStatus("🔴 ERROR (DISCONNECTED)");
+            }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            setStatus("ERROR");
+            toast.error("Telemetry Connection Failed");
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    // Heartbeat & Age Logic
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const now = Date.now();
+            const timeSinceLastAdvance = (now - lastSeenRef.current.lastAdvance) / 1000;
+            const HEARTBEAT_TIMEOUT = 10;
+
+            const isFresh = timeSinceLastAdvance < HEARTBEAT_TIMEOUT;
+            setStatus(isFresh ? "ONLINE" : "OFFLINE");
+
+            if (data.timestamp > 0) {
+                const isUnix = data.timestamp > 1000000000;
+                const ageSec = isUnix
+                    ? Math.round((now - data.timestamp * 1000) / 1000)
+                    : Math.round(timeSinceLastAdvance);
+                setAge(ageSec);
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [data.timestamp]);
+
+    // Notifications Logic
+    useEffect(() => {
+        if (!prevData) return;
+
+        const notify = (title: string, body: string, type: 'error' | 'warning' | 'success' = 'error') => {
+            // In-app toast
+            toast(title, {
+                icon: type === 'error' ? '🚨' : (type === 'warning' ? '⚠️' : '✅'),
+                duration: 6000,
+                position: 'top-right',
+                style: {
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    border: '1px solid var(--border-color)',
+                    backdropFilter: 'blur(10px)',
+                }
+            });
+
+            // Browser notification
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`LifeGuardX: ${title}`, { body });
             }
         };
 
-        fetchData();
-        const interval = setInterval(fetchData, 2000);
-        return () => clearInterval(interval);
-    }, []);
+        // Accident Detection
+        if (data.accident.detected && !prevData.accident.detected) {
+            notify(
+                `CRITICAL ACCIDENT DETECTED`,
+                `Severity: ${data.accident.severity}. G-Force: ${data.sensors.gforce.toFixed(2)}g at ${data.sensors.tilt_angle.toFixed(1)}° tilt.`
+            );
+        }
 
-    const isCritical = data.accident.severity === "CRITICAL" || data.sensors.gforce > 5;
-    const isModerate = data.accident.severity === "MODERATE" || data.sensors.gforce > 2.5;
-    const googleMapsUrl = `https://www.google.com/maps?q=${data.location.latitude},${data.location.longitude}`;
+        // Hazard Sensors
+        if (data.sensors.fire && !prevData.sensors.fire) notify("FIRE ALERT", "Smoke or Flame detected in vehicle!", 'error');
+        if (data.sensors.gas_leak && !prevData.sensors.gas_leak) notify("GAS LEAK", "Dangerous gas levels detected!", 'error');
+        if (data.sensors.water_detected && !prevData.sensors.water_detected) notify("SUBMERSION ALERT", "Vehicle water entry detected!", 'error');
+
+        // Connectivity
+        if (status === "OFFLINE" && (prevData as any).status !== "OFFLINE") {
+            toast.error("Vehicle Signal Lost", { id: 'offline-toast' });
+        } else if (status === "ONLINE" && (prevData as any).status === "OFFLINE") {
+            toast.success("Vehicle Reconnected", { id: 'offline-toast' });
+        }
+    }, [data, status, prevData]);
+
+    const isCritical = data.accident.severity === "CRITICAL" || data.sensors.gforce > 5 || data.sensors.fire;
+    const isModerate = data.accident.detected || data.sensors.gforce > 2.5 || data.sensors.gas_leak || data.sensors.water_detected;
+
+    // Stability simulation based on signal age
+    const stability = Math.max(0, Math.min(100, 100 - (age * 2) + (Math.random() * 2)));
+    const isOnline = status === "ONLINE";
 
     return (
-        <div className={`min-h-screen bg-background font-sans transition-colors duration-500 ${isCritical ? 'bg-red-50' : ''}`}>
-            {/* CRITICAL OVERLAY */}
+        <div className="min-h-screen">
+            <Toaster />
+
+            {/* AMBIENT ALERT GLOW */}
             <AnimatePresence>
-                {isCritical && (
+                {(data.accident.detected || data.sensors.fire) && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-danger/10 pointer-events-none z-[100] border-[16px] border-danger/20 animate-pulse"
+                        className="fixed inset-0 pointer-events-none z-0 bg-red-500/5 shadow-[inset_0_0_150px_rgba(239,68,68,0.3)] transition-colors duration-1000"
                     />
                 )}
             </AnimatePresence>
 
-            <Header vehicleId={data.vehicle_id} status={status} isCritical={isCritical} />
+            <div className="relative z-10">
+                <Header
+                    vehicleId={data.vehicle_id}
+                    status={status}
+                    isCritical={isCritical}
+                    isDark={isDark}
+                    onToggleTheme={() => setIsDark(!isDark)}
+                />
 
-            <main className="max-w-7xl mx-auto p-4 space-y-4">
-                <EmergencyBanner isCritical={isCritical} />
-                <StatusCards data={data} isCritical={isCritical} isModerate={isModerate} />
-                <SensorGrid data={data} age={age} googleMapsUrl={googleMapsUrl} />
-                <MapDisplay latitude={data.location.latitude} longitude={data.location.longitude} />
-                <Footer vehicleId={data.vehicle_id} systemStatus={data.system.device_status} />
-            </main>
+                <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8 space-y-6">
+                    <EmergencyBanner
+                        isCritical={isCritical}
+                        isFresh={isOnline}
+                        gpsFix={data.location.gps_fix}
+                        accidentDetected={data.accident.detected}
+                        stability={stability}
+                        lastHandshake={age === 0 ? "NOW" : `${age}s ago`}
+                    />
+
+                    <SensorGrid data={data} age={age} />
+
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                    >
+                        <MapDisplay latitude={data.location.latitude} longitude={data.location.longitude} />
+                    </motion.div>
+                </main>
+
+                <Footer />
+            </div>
         </div>
     );
 };
 
 export default App;
+
