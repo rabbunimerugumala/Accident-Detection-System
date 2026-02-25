@@ -1,7 +1,13 @@
 const https = require('https');
+require('dotenv').config();  // loads .env if present
 
-// FIX: Target the ROOT of the database so 'accidentState' isn't double-nested
-const FIREBASE_URL = "https://accident-detection-syste-f7f23-default-rtdb.firebaseio.com/.json";
+// Load Firebase URL from environment — set FIREBASE_DATABASE_URL in your .env
+const dbUrl = process.env.FIREBASE_DATABASE_URL;
+if (!dbUrl) {
+    console.error('❌ FIREBASE_DATABASE_URL is not set. Add it to your .env file.');
+    process.exit(1);
+}
+const FIREBASE_URL = dbUrl.replace(/\/?$/, '/.json');
 
 // User requested this format: { "accidentState": { ... } }
 const DATA_TO_WRITE = {

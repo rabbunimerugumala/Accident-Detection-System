@@ -485,13 +485,13 @@ npm run build
 
 ### ESP32 Firebase Endpoint
 
-The ESP32 firmware must target:
+The ESP32 firmware must target your Firebase Realtime Database URL in this format:
 
 ```
-https://accident-detection-syste-f7f23-default-rtdb.firebaseio.com/accidentState.json
+https://<your-project-id>-default-rtdb.firebaseio.com/accidentState.json
 ```
 
-Method: `HTTP PUT` or `PATCH` with the JSON structure shown in [Firebase Database Structure](#-firebase-database-structure).
+Replace `<your-project-id>` with your own Firebase project ID. Method: `HTTP PUT` or `PATCH` with the JSON structure shown in [Firebase Database Structure](#-firebase-database-structure).
 
 ---
 

@@ -11,9 +11,9 @@ import SensorGrid from './components/SensorGrid';
 import MapDisplay from './components/MapDisplay';
 import Footer from './components/Footer';
 
-// Firebase Config (Derived from URL provided)
+// Firebase Config — loaded from .env (never hardcoded)
 const firebaseConfig = {
-    databaseURL: "https://accident-detection-syste-f7f23-default-rtdb.firebaseio.com"
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
 };
 
 const app = initializeApp(firebaseConfig);

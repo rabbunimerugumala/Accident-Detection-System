@@ -9,8 +9,16 @@
  */
 
 const https = require('https');
+require('dotenv').config();  // loads .env if present (optional, graceful if not installed)
 
-const FIREBASE_HOST = 'accident-detection-syste-f7f23-default-rtdb.firebaseio.com';
+// Load Firebase host from environment — set FIREBASE_DATABASE_URL in your .env
+const FIREBASE_DB_URL = process.env.FIREBASE_DATABASE_URL;
+if (!FIREBASE_DB_URL) {
+    console.error('[Watchdog] ❌ FIREBASE_DATABASE_URL is not set. Add it to your .env file.');
+    process.exit(1);
+}
+const FIREBASE_HOST = new URL(FIREBASE_DB_URL).hostname;
+
 const HEARTBEAT_TIMEOUT_MS = 10000; // 10 seconds
 
 let lastTimestamp = null;
