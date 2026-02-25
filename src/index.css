@@ -44,7 +44,7 @@
 
     .light {
         --bg-main: #f1f5f9;
-        --bg-card: rgba(255, 255, 255, 0.8);
+        --bg-card: rgba(255, 255, 255, 0.85);
         --bg-header: rgba(255, 255, 255, 0.9);
 
         --text-main: #0f172a;
@@ -52,17 +52,18 @@
         --text-muted: #64748b;
         --text-dim: #94a3b8;
 
-        --border-color: rgba(15, 23, 42, 0.1);
-        --border-hover: rgba(37, 99, 235, 0.3);
+        --border-color: rgba(15, 23, 42, 0.12);
+        --border-hover: rgba(59, 130, 246, 0.4);
 
-        --accent-emerald: #15803d;
-        --accent-blue: #1d4ed8;
-        --accent-amber: #b45309;
-        --accent-rose: #be123c;
-        --accent-indigo: #4338ca;
-        --accent-cyan: #0e7490;
+        --accent-emerald: #059669;
+        --accent-blue: #2563eb;
+        --accent-amber: #d97706;
+        --accent-rose: #dc2626;
+        --accent-indigo: #4f46e5;
+        --accent-cyan: #0891b2;
 
-        --neon-glow: 0 0 15px rgba(37, 99, 235, 0.2);
+        --glass-blur: blur(28px);
+        --neon-glow: 0 0 25px rgba(59, 130, 246, 0.2);
     }
 
     body {
@@ -70,9 +71,10 @@
         color: var(--text-main);
         @apply font-sans antialiased transition-colors duration-500;
         background-image:
-            radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 40%),
-            radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+            radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 40%),
+            radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+            radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.1) 0px, transparent 80%);
         background-attachment: fixed;
     }
 }
@@ -83,12 +85,15 @@
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
         border: 1px solid var(--border-color);
-        @apply rounded-3xl p-6 transition-all duration-300;
+        @apply rounded-[2.5rem] p-7 transition-all duration-300;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.03), 0 20px 25px -5px rgba(59, 130, 246, 0.05);
     }
 
-    .glass-card:hover {
-        border-color: var(--border-hover);
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+    .light .glass-card {
+        box-shadow:
+            0 10px 15px -10px rgba(59, 130, 246, 0.12),
+            0 20px 30px -15px rgba(0, 0, 0, 0.05),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.4);
     }
 
     .neon-pulse {
@@ -97,31 +102,98 @@
 
     .neon-pulse::after {
         content: '';
-        @apply absolute inset-0 rounded-full opacity-50 blur-md animate-pulse;
+        @apply absolute inset-0 rounded-3xl opacity-50 blur-xl animate-pulse;
         background: currentColor;
     }
 
     .label-pro {
-        color: var(--text-muted);
-        @apply text-[10px] font-extrabold uppercase tracking-[0.2em] mb-1.5 block;
+        color: var(--text-secondary);
+        @apply text-[11px] font-[900] uppercase tracking-[0.35em] mb-2 block opacity-90;
     }
 
-    .value-pro {
-        @apply text-4xl lg:text-5xl font-black tracking-tighter leading-none;
-    }
-
-    .progress-track {
-        @apply w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800/50 overflow-hidden relative;
+    .progress-container {
+        @apply w-full bg-slate-200 dark:bg-white/10 rounded-full h-4 overflow-hidden relative border border-slate-300/50 dark:border-white/5;
     }
 
     .progress-fill {
-        @apply h-full rounded-full transition-all duration-700 ease-out;
+        @apply h-full transition-all duration-1000 ease-out rounded-full relative overflow-hidden;
+        background: var(--bar-gradient, linear-gradient(90deg, var(--accent-emerald), var(--accent-blue)));
+        box-shadow: 0 0 15px -3px rgba(var(--accent-rgb), 0.4);
+    }
+
+    .light .progress-fill {
+        box-shadow: 0 2px 8px -2px rgba(var(--accent-rgb), 0.3);
+    }
+
+    .severity-matrix-segment {
+        @apply h-3.5 flex-1 rounded-full transition-all duration-700 border border-slate-400/30 dark:border-white/10;
+        background-color: rgba(148, 163, 184, 0.1);
+    }
+
+    .dark .severity-matrix-segment {
+        background-color: rgba(255, 255, 255, 0.05);
     }
 
     .icon-container {
-        @apply p-4 rounded-3xl transition-all duration-500 flex items-center justify-center;
-        background: var(--bg-main);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        @apply w-13 h-13 rounded-full transition-all duration-500 flex items-center justify-center relative z-10;
+        background: rgba(var(--accent-rgb), 0.25);
+        color: var(--accent-color);
+        box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.3);
+    }
+
+    .light .icon-container {
+        background-color: rgba(var(--accent-rgb), 0.2);
+        box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .icon-glow {
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+
+    /* Target specific colors for consistency if needed */
+    .icon-zap {
+        --accent-rgb: 245, 158, 11;
+        --accent-color: var(--accent-amber);
+    }
+
+    .icon-flame {
+        --accent-rgb: 244, 63, 94;
+        --accent-color: var(--accent-rose);
+    }
+
+    .icon-shield {
+        --accent-rgb: 59, 130, 246;
+        --accent-color: var(--accent-blue);
+    }
+
+    .icon-emerald {
+        --accent-rgb: 16, 185, 129;
+        --accent-color: var(--accent-emerald);
+    }
+
+    .icon-blue {
+        --accent-rgb: 59, 130, 246;
+        --accent-color: var(--accent-blue);
+    }
+
+    .icon-amber {
+        --accent-rgb: 251, 191, 36;
+        --accent-color: var(--accent-amber);
+    }
+
+    .icon-rose {
+        --accent-rgb: 244, 63, 94;
+        --accent-color: var(--accent-rose);
+    }
+
+    .icon-indigo {
+        --accent-rgb: 99, 102, 241;
+        --accent-color: var(--accent-indigo);
+    }
+
+    .icon-cyan {
+        --accent-rgb: 6, 182, 212;
+        --accent-color: var(--accent-cyan);
     }
 }
 

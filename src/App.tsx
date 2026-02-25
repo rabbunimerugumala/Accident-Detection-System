@@ -7,7 +7,6 @@ import { FirebaseData } from './types';
 
 // Modular Components
 import Header from './components/Header';
-import EmergencyBanner from './components/EmergencyBanner';
 import SensorGrid from './components/SensorGrid';
 import MapDisplay from './components/MapDisplay';
 import Footer from './components/Footer';
@@ -50,7 +49,6 @@ function usePrevious<T>(value: T): T | undefined {
 const App: React.FC = () => {
     const [data, setData] = useState<FirebaseData['accidentState']>(INITIAL_STATE);
     const [status, setStatus] = useState("CONNECTING...");
-    const [age, setAge] = useState(0);
     const [isDark, setIsDark] = useState(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('theme');
@@ -122,11 +120,7 @@ const App: React.FC = () => {
             setStatus(isFresh ? "ONLINE" : "OFFLINE");
 
             if (data.timestamp > 0) {
-                const isUnix = data.timestamp > 1000000000;
-                const ageSec = isUnix
-                    ? Math.round((now - data.timestamp * 1000) / 1000)
-                    : Math.round(timeSinceLastAdvance);
-                setAge(ageSec);
+                // Heartbeat still active through status state
             }
         }, 1000);
 
@@ -142,7 +136,7 @@ const App: React.FC = () => {
             toast(title, {
                 icon: type === 'error' ? '🚨' : (type === 'warning' ? '⚠️' : '✅'),
                 duration: 6000,
-                position: 'top-right',
+                position: 'top-center',
                 style: {
                     background: 'var(--bg-card)',
                     color: 'var(--text-main)',
@@ -178,20 +172,16 @@ const App: React.FC = () => {
         }
     }, [data, status, prevData]);
 
-    const isCritical = data.accident.severity === "CRITICAL" || data.sensors.gforce > 5 || data.sensors.fire;
-    const isModerate = data.accident.detected || data.sensors.gforce > 2.5 || data.sensors.gas_leak || data.sensors.water_detected;
-
-    // Stability simulation based on signal age
-    const stability = Math.max(0, Math.min(100, 100 - (age * 2) + (Math.random() * 2)));
     const isOnline = status === "ONLINE";
+    const isCritical = isOnline && (data.accident.severity === "CRITICAL" || data.sensors.gforce > 5 || data.sensors.fire);
 
     return (
         <div className="min-h-screen">
-            <Toaster />
+            <Toaster position="top-center" />
 
             {/* AMBIENT ALERT GLOW */}
             <AnimatePresence>
-                {(data.accident.detected || data.sensors.fire) && (
+                {isOnline && (data.accident.detected || data.sensors.fire) && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -203,7 +193,6 @@ const App: React.FC = () => {
 
             <div className="relative z-10">
                 <Header
-                    vehicleId={data.vehicle_id}
                     status={status}
                     isCritical={isCritical}
                     isDark={isDark}
@@ -211,23 +200,20 @@ const App: React.FC = () => {
                 />
 
                 <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8 space-y-6">
-                    <EmergencyBanner
-                        isCritical={isCritical}
-                        isFresh={isOnline}
-                        gpsFix={data.location.gps_fix}
-                        accidentDetected={data.accident.detected}
-                        stability={stability}
-                        lastHandshake={age === 0 ? "NOW" : `${age}s ago`}
-                    />
-
-                    <SensorGrid data={data} age={age} />
+                    <SensorGrid data={data} status={status} />
 
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                     >
-                        <MapDisplay latitude={data.location.latitude} longitude={data.location.longitude} />
+                        <MapDisplay
+                            latitude={data.location.latitude}
+                            longitude={data.location.longitude}
+                            accidentDetected={data.accident.detected}
+                            gpsFix={data.location.gps_fix}
+                            status={status}
+                        />
                     </motion.div>
                 </main>
 

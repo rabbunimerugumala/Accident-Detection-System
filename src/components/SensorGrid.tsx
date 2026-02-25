@@ -1,7 +1,6 @@
-import React from 'react';
 import {
-    Flame, Wind, Droplets, Zap, RotateCcw, Volume2,
-    Thermometer, Clock, ShieldAlert
+    Flame, Wind, Droplets, Zap, RotateCw, Volume2,
+    Thermometer, Shield
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FirebaseData } from '../types';
@@ -9,12 +8,26 @@ import SensorCard from './SensorCard';
 
 interface SensorGridProps {
     data: FirebaseData['accidentState'];
-    age: number;
+    status: string;
 }
 
 
-const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
-    const sensors = data.sensors;
+const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
+    const isOnline = status === "ONLINE";
+
+    // Override values if system is NOT online (Safety Reset)
+    const rawSensors = data.sensors;
+    const sensors = isOnline ? rawSensors : {
+        fire: false,
+        gas_leak: false,
+        gforce: 0,
+        sound_level: 0,
+        temperature: 0,
+        tilt_angle: 0,
+        water_detected: false
+    };
+
+    const accident = isOnline ? data.accident : { detected: false, severity: "SAFE" as const };
 
     const container = {
         hidden: { opacity: 0 },
@@ -43,25 +56,26 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                 <SensorCard
                     isHero
                     title="Accident Shield & Severity"
-                    value={data.accident.detected ? data.accident.severity : "SECURE"}
-                    icon={ShieldAlert}
-                    status={data.accident.detected ? "CRITICAL ALERT" : "MONITORING"}
-                    statusColor={data.accident.detected ? "var(--accent-rose)" : "var(--accent-emerald)"}
-                    iconColor={data.accident.detected ? "var(--accent-rose)" : "var(--accent-blue)"}
-                    alert={data.accident.detected}
-                    percentage={data.accident.detected ? 100 : 0}
+                    value={accident.detected ? accident.severity : "SECURE"}
+                    icon={Shield}
+                    iconType={accident.detected ? "rose" : "shield"}
+                    status={accident.detected ? "CRITICAL ALERT" : "MONITORING"}
+                    statusColor={accident.detected ? "var(--accent-rose)" : "var(--accent-emerald)"}
+                    iconColor={accident.detected ? "var(--accent-rose)" : "var(--accent-blue)"}
+                    alert={accident.detected}
                 >
-                    <div className="mt-4 p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Severity Matrix</span>
-                            <span className={`text-[10px] font-black uppercase ${data.accident.detected ? 'text-red-500' : 'text-emerald-500'}`}>
-                                {data.accident.detected ? 'Logic: Critical G-Force/Tilt' : 'Safe Operation'}
+                    <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/5 backdrop-blur-sm">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-[11px] font-[1000] text-secondary uppercase tracking-[0.2em]">Severity Matrix</span>
+                            <span className={`text-[11px] font-[1000] uppercase tracking-wider ${accident.detected ? 'text-red-500' : 'text-emerald-700 dark:text-emerald-500'}`}>
+                                {accident.detected ? `Logic: ${accident.severity} Impact` : 'Safe Operation'}
                             </span>
                         </div>
                         <div className="flex gap-2">
-                            <div className={`h-1 flex-1 rounded-full ${data.accident.detected ? 'bg-red-500' : 'bg-slate-700'}`} />
-                            <div className={`h-1 flex-1 rounded-full ${data.accident.detected ? 'bg-red-500' : 'bg-slate-700'}`} />
-                            <div className={`h-1 flex-1 rounded-full ${data.accident.detected ? 'bg-red-500' : 'bg-slate-700'}`} />
+                            {/* Segmented Progress: 1 for LOW, 2 for MODERATE, 3 for CRITICAL */}
+                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
+                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && (accident.severity === 'MODERATE' || accident.severity === 'CRITICAL') ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
+                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && accident.severity === 'CRITICAL' ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
                         </div>
                     </div>
                 </SensorCard>
@@ -74,6 +88,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     value={sensors.gforce.toFixed(2)}
                     unit="g"
                     icon={Zap}
+                    iconType="zap"
                     status={sensors.gforce > 2.5 ? "HIGH G-LOAD" : "NORMAL"}
                     statusColor={sensors.gforce > 2.5 ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-amber)"
@@ -88,7 +103,8 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     title="Chassis Tilt"
                     value={sensors.tilt_angle.toFixed(1)}
                     unit="°"
-                    icon={RotateCcw}
+                    icon={RotateCw}
+                    iconType="cyan"
                     status={Math.abs(sensors.tilt_angle) > 35 ? "STABILITY RISK" : "LEVEL"}
                     statusColor={Math.abs(sensors.tilt_angle) > 35 ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-cyan)"
@@ -104,6 +120,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     title="Fire Sentinel"
                     value={sensors.fire ? "FIRE!" : "CLEAR"}
                     icon={Flame}
+                    iconType="flame"
                     status={sensors.fire ? "HAZARD DETECTED" : "NOMINAL"}
                     statusColor={sensors.fire ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-rose)"
@@ -118,6 +135,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     title="Atmosphere"
                     value={sensors.gas_leak ? "LEAK" : "STABLE"}
                     icon={Wind}
+                    iconType="emerald"
                     status={sensors.gas_leak ? "TOXIC HAZARD" : "SAFE"}
                     statusColor={sensors.gas_leak ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-emerald)"
@@ -132,6 +150,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     title="Submersion"
                     value={sensors.water_detected ? "WET" : "DRY"}
                     icon={Droplets}
+                    iconType="blue"
                     status={sensors.water_detected ? "WATER ENTRY" : "UNFILTERED"}
                     statusColor={sensors.water_detected ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-blue)"
@@ -140,17 +159,17 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                 />
             </motion.div>
 
-            {/* SOUND */}
+            {/* SOUND/ACOUSTICS */}
             <motion.div variants={item}>
                 <SensorCard
                     title="Acoustics"
                     value={sensors.sound_level}
                     unit="%"
                     icon={Volume2}
-                    status={sensors.sound_level > 80 ? "PEAK NOISE" : "AMBIENT"}
-                    statusColor={sensors.sound_level > 80 ? "var(--accent-rose)" : "var(--accent-emerald)"}
+                    iconType="indigo"
+                    status="AMBIENT"
+                    statusColor="var(--accent-emerald)"
                     iconColor="var(--accent-indigo)"
-                    alert={sensors.sound_level > 80}
                     percentage={sensors.sound_level}
                 />
             </motion.div>
@@ -162,25 +181,12 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, age }) => {
                     value={sensors.temperature.toFixed(1)}
                     unit="°C"
                     icon={Thermometer}
+                    iconType="amber"
                     status={sensors.temperature > 50 ? "OVERHEAT" : "OPTIMAL"}
                     statusColor={sensors.temperature > 50 ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-amber)"
                     alert={sensors.temperature > 50}
                     percentage={(sensors.temperature / 100) * 100}
-                />
-            </motion.div>
-
-            {/* SYSTEM STATUS */}
-            <motion.div variants={item}>
-                <SensorCard
-                    title="Telemetry Link"
-                    value={age < 10 ? "LINKED" : "LOST"}
-                    icon={Clock}
-                    status={age < 10 ? "SYNCHRONIZED" : "OFFLINE"}
-                    statusColor={age < 10 ? "var(--accent-emerald)" : "var(--accent-rose)"}
-                    iconColor={age < 10 ? "var(--accent-blue)" : "var(--accent-rose)"}
-                    alert={age >= 10}
-                    percentage={Math.max(0, 100 - (age * 10))}
                 />
             </motion.div>
         </motion.div>
