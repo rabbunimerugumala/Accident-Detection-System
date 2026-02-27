@@ -1,19 +1,22 @@
+import React, { useState } from 'react';
 import {
-    Flame, Wind, Droplets, Zap, RotateCw, Volume2,
-    Thermometer, Shield
+    Flame, Wind, Droplets, Zap, RotateCw,
+    Thermometer, Shield, Bug
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FirebaseData } from '../types';
 import SensorCard from './SensorCard';
 
 interface SensorGridProps {
     data: FirebaseData['accidentState'];
     status: string;
+    buttonRaw: boolean;
 }
 
 
-const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
+const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw }) => {
     const isOnline = status === "ONLINE";
+    const [debugOpen, setDebugOpen] = useState(false);
 
     // Override values if system is NOT online (Safety Reset)
     const rawSensors = data.sensors;
@@ -21,13 +24,14 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
         fire: false,
         gas_leak: false,
         gforce: 0,
-        sound_level: 0,
         temperature: 0,
         tilt_angle: 0,
         water_detected: false
     };
 
     const accident = isOnline ? data.accident : { detected: false, severity: "SAFE" as const };
+    const buttonPressed = isOnline ? data.button_pressed : false;
+    const buttonRawState = isOnline ? buttonRaw : false;
 
     const container = {
         hidden: { opacity: 0 },
@@ -51,19 +55,20 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
             animate="show"
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-2 pb-20"
         >
-            {/* HERO: ACCIDENT STATUS (Col-span-2) */}
-            <motion.div variants={item} className="md:col-span-2">
+            {/* HERO: ACCIDENT STATUS (Full width) */}
+            <motion.div variants={item} className="col-span-1 md:col-span-2 xl:col-span-3">
                 <SensorCard
                     isHero
                     title="Accident Shield & Severity"
-                    value={accident.detected ? accident.severity : "SECURE"}
+                    value={accident.detected ? accident.severity : buttonPressed ? "RESETTED" : "SECURE"}
                     icon={Shield}
                     iconType={accident.detected ? "rose" : "shield"}
-                    status={accident.detected ? "CRITICAL ALERT" : "MONITORING"}
+                    status={accident.detected ? "CRITICAL ALERT" : buttonPressed ? "BUTTON PRESSED — ALERT CLEARED" : "MONITORING"}
                     statusColor={accident.detected ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor={accident.detected ? "var(--accent-rose)" : "var(--accent-blue)"}
                     alert={accident.detected}
                 >
+                    {/* Severity Matrix */}
                     <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/5 backdrop-blur-sm">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-[11px] font-[1000] text-secondary uppercase tracking-[0.2em]">Severity Matrix</span>
@@ -72,7 +77,6 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
                             </span>
                         </div>
                         <div className="flex gap-2">
-                            {/* Segmented Progress: 1 for LOW, 2 for MODERATE, 3 for CRITICAL */}
                             <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
                             <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && (accident.severity === 'MODERATE' || accident.severity === 'CRITICAL') ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
                             <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && accident.severity === 'CRITICAL' ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
@@ -81,7 +85,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
                 </SensorCard>
             </motion.div>
 
-            {/* IMPACT FORCE (MPU Priority) */}
+            {/* IMPACT FORCE */}
             <motion.div variants={item}>
                 <SensorCard
                     title="Impact Force"
@@ -93,7 +97,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
                     statusColor={sensors.gforce > 2.5 ? "var(--accent-rose)" : "var(--accent-emerald)"}
                     iconColor="var(--accent-amber)"
                     alert={sensors.gforce > 2.5}
-                    percentage={(sensors.gforce / 8) * 100} // Capped at 8g for scale
+                    percentage={(sensors.gforce / 8) * 100}
                 />
             </motion.div>
 
@@ -159,21 +163,6 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
                 />
             </motion.div>
 
-            {/* SOUND/ACOUSTICS */}
-            <motion.div variants={item}>
-                <SensorCard
-                    title="Acoustics"
-                    value={sensors.sound_level}
-                    unit="%"
-                    icon={Volume2}
-                    iconType="indigo"
-                    status="AMBIENT"
-                    statusColor="var(--accent-emerald)"
-                    iconColor="var(--accent-indigo)"
-                    percentage={sensors.sound_level}
-                />
-            </motion.div>
-
             {/* TEMPERATURE */}
             <motion.div variants={item}>
                 <SensorCard
@@ -188,6 +177,75 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status }) => {
                     alert={sensors.temperature > 50}
                     percentage={(sensors.temperature / 100) * 100}
                 />
+            </motion.div>
+
+            {/* ── DEBUG PANEL ── */}
+            <motion.div variants={item} className="col-span-1 md:col-span-2 xl:col-span-3">
+                <div className="rounded-2xl border border-white/10 dark:border-white/5 bg-white/5 dark:bg-white/[0.02] overflow-hidden">
+                    <button
+                        onClick={() => setDebugOpen(o => !o)}
+                        className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/5 transition-colors group"
+                    >
+                        <span className="flex items-center gap-2 text-[11px] font-black text-secondary uppercase tracking-[0.3em] group-hover:text-main transition-colors">
+                            <Bug className="w-3.5 h-3.5" />
+                            Hardware Debug Panel
+                        </span>
+                        <span className="text-[10px] font-bold text-secondary/60 tracking-widest uppercase">
+                            {debugOpen ? "▲ hide" : "▼ show"}
+                        </span>
+                    </button>
+
+                    <AnimatePresence>
+                        {debugOpen && (
+                            <motion.div
+                                key="debug-panel"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden"
+                            >
+                                <div className="px-5 pb-5 pt-1 grid grid-cols-2 gap-4">
+                                    {/* Button Latch */}
+                                    <div className={`flex flex-col gap-1.5 p-4 rounded-xl border transition-all duration-500 ${buttonPressed
+                                        ? 'border-emerald-500/40 bg-emerald-500/10 shadow-lg shadow-emerald-500/10'
+                                        : 'border-white/10 bg-white/5'
+                                        }`}>
+                                        <span className="text-[10px] font-black text-secondary uppercase tracking-[0.25em]">
+                                            Button Latch&nbsp;
+                                            <span className="text-secondary/50 font-semibold normal-case tracking-normal">(12 s hold)</span>
+                                        </span>
+                                        <span className={`text-2xl font-black leading-none tracking-tight ${buttonPressed ? 'text-emerald-400' : 'text-secondary/40'
+                                            }`}>
+                                            {buttonPressed ? "TRUE" : "false"}
+                                        </span>
+                                        <span className="text-[10px] font-semibold text-secondary/50">
+                                            {buttonPressed ? "▶ Latched (ESP32 timer running)" : "○ Idle"}
+                                        </span>
+                                    </div>
+
+                                    {/* Button Raw */}
+                                    <div className={`flex flex-col gap-1.5 p-4 rounded-xl border transition-all duration-500 ${buttonRawState
+                                        ? 'border-amber-500/40 bg-amber-500/10 shadow-lg shadow-amber-500/10'
+                                        : 'border-white/10 bg-white/5'
+                                        }`}>
+                                        <span className="text-[10px] font-black text-secondary uppercase tracking-[0.25em]">
+                                            Button Raw&nbsp;
+                                            <span className="text-secondary/50 font-semibold normal-case tracking-normal">(live pin)</span>
+                                        </span>
+                                        <span className={`text-2xl font-black leading-none tracking-tight ${buttonRawState ? 'text-amber-400' : 'text-secondary/40'
+                                            }`}>
+                                            {buttonRawState ? "PRESSED" : "idle"}
+                                        </span>
+                                        <span className="text-[10px] font-semibold text-secondary/50">
+                                            {buttonRawState ? "▶ Physically held right now" : "○ Not held"}
+                                        </span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </motion.div>
         </motion.div>
     );

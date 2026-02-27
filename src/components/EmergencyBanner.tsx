@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Zap, Satellite, Activity, Wifi } from 'lucide-react';
+import { Shield, Zap, Satellite, Activity, MousePointerClick } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface EmergencyBannerProps {
@@ -9,15 +9,17 @@ interface EmergencyBannerProps {
     accidentDetected: boolean;
     stability: number;
     lastHandshake: string;
+    buttonPressed: boolean;
 }
 
 const EmergencyBanner: React.FC<EmergencyBannerProps> = ({
-    isCritical,
+    isCritical: _isCritical,
     isFresh,
     gpsFix,
     accidentDetected,
     stability,
-    lastHandshake
+    lastHandshake,
+    buttonPressed
 }) => {
     return (
         <div className="w-full mb-8">
@@ -55,8 +57,8 @@ const EmergencyBanner: React.FC<EmergencyBannerProps> = ({
                     <div className="flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto">
                         {/* Accident Status */}
                         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-500 ${accidentDetected
-                                ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                            ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
                             }`}>
                             <Zap className={`w-3.5 h-3.5 ${accidentDetected ? 'animate-bounce' : ''}`} />
                             <span className="text-[10px] font-black uppercase tracking-widest">
@@ -66,12 +68,23 @@ const EmergencyBanner: React.FC<EmergencyBannerProps> = ({
 
                         {/* GPS Lock */}
                         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-500 ${gpsFix
-                                ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                                : 'bg-amber-500/10 border-amber-500/40 text-amber-500'
+                            ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                            : 'bg-amber-500/10 border-amber-500/40 text-amber-500'
                             }`}>
                             <Satellite className="w-3.5 h-3.5" />
                             <span className="text-[10px] font-black uppercase tracking-widest">
                                 GPS Lock: {gpsFix ? 'LOCKED' : 'WAITING FOR GPS'}
+                            </span>
+                        </div>
+
+                        {/* Reset Button Status */}
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-500 ${buttonPressed
+                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.15)]'
+                            : 'bg-white/5 border-white/5 text-slate-500'
+                            }`}>
+                            <MousePointerClick className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                BTN: {buttonPressed ? 'PRESSED' : 'IDLE'}
                             </span>
                         </div>
 

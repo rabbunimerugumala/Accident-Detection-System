@@ -6,9 +6,11 @@ interface HeaderProps {
     isCritical: boolean;
     isDark: boolean;
     onToggleTheme: () => void;
+    buttonPressed: boolean;
+    accidentDetected: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ status, isCritical, isDark, onToggleTheme }) => {
+const Header: React.FC<HeaderProps> = ({ status, isCritical, isDark: _isDark, onToggleTheme: _onToggleTheme, buttonPressed: _buttonPressed, accidentDetected: _accidentDetected }) => {
     const isOnline = status === "ONLINE";
 
     return (
@@ -38,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ status, isCritical, isDark, onToggleThe
                     {/* Centered Messages will appear here via Toaster */}
                 </div>
 
-                {/* Right: Connectivity Status */}
+                {/* Right: Connectivity Status only */}
                 <div className="flex justify-end items-center gap-4">
                     <motion.div
                         animate={!isOnline ? { scale: [1, 1.05, 1], opacity: [1, 0.8, 1] } : {}}

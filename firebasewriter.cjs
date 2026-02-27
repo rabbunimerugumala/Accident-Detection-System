@@ -16,6 +16,8 @@ const DATA_TO_WRITE = {
             "detected": false,
             "severity": "SAFE"
         },
+        "button_pressed": false,
+        "button_raw": false,
         "location": {
             "gps_fix": false,
             "latitude": 0,
@@ -26,7 +28,6 @@ const DATA_TO_WRITE = {
             "fire": false,
             "gas_leak": false,
             "gforce": 0,
-            "sound_level": 0,
             "temperature": 0,
             "tilt_angle": 0,
             "water_detected": false

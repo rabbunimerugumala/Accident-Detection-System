@@ -4,6 +4,8 @@ export interface FirebaseData {
             detected: boolean;
             severity: "SAFE" | "MODERATE" | "CRITICAL";
         };
+        button_pressed: boolean;
+        button_raw: boolean;
         location: {
             gps_fix: boolean;
             latitude: number;
@@ -14,7 +16,6 @@ export interface FirebaseData {
             fire: boolean;
             gas_leak: boolean;
             gforce: number;
-            sound_level: number;
             temperature: number;
             tilt_angle: number;
             water_detected: boolean;

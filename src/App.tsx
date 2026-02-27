@@ -10,6 +10,8 @@ import Header from './components/Header';
 import SensorGrid from './components/SensorGrid';
 import MapDisplay from './components/MapDisplay';
 import Footer from './components/Footer';
+// EmergencyBanner disabled for now
+// import EmergencyBanner from './components/EmergencyBanner';
 
 // Firebase Config — loaded from .env (never hardcoded)
 const firebaseConfig = {
@@ -21,13 +23,14 @@ const db = getDatabase(app);
 
 const INITIAL_STATE: FirebaseData['accidentState'] = {
     accident: { detected: false, severity: "SAFE" },
+    button_pressed: false,
+    button_raw: false,
     location: { gps_fix: false, latitude: 0, longitude: 0 },
     online: false,
     sensors: {
         fire: false,
         gas_leak: false,
         gforce: 0,
-        sound_level: 0,
         temperature: 0,
         tilt_angle: 0,
         water_detected: false
@@ -94,10 +97,11 @@ const App: React.FC = () => {
                     setData(state);
                     setStatus("ONLINE");
 
+                    // Always refresh lastAdvance on ANY Firebase update.
+                    // Previously only updated when timestamp changed — this caused
+                    // false OFFLINE when ESP32 sent data without changing the timestamp.
                     const now = Date.now();
-                    if (state.timestamp !== lastSeenRef.current.ts) {
-                        lastSeenRef.current = { ts: state.timestamp, lastAdvance: now };
-                    }
+                    lastSeenRef.current = { ts: state.timestamp, lastAdvance: now };
                 }
             }
         }, (error) => {
@@ -114,18 +118,16 @@ const App: React.FC = () => {
         const timer = setInterval(() => {
             const now = Date.now();
             const timeSinceLastAdvance = (now - lastSeenRef.current.lastAdvance) / 1000;
-            const HEARTBEAT_TIMEOUT = 10;
+            // If the ESP32 sets online:true but timestamp hasn't advanced,
+            // treat a fresh Firebase snapshot (within 30s) as alive.
+            const HEARTBEAT_TIMEOUT = 30;
 
             const isFresh = timeSinceLastAdvance < HEARTBEAT_TIMEOUT;
             setStatus(isFresh ? "ONLINE" : "OFFLINE");
-
-            if (data.timestamp > 0) {
-                // Heartbeat still active through status state
-            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [data.timestamp]);
+    }, []);
 
     // Notifications Logic
     useEffect(() => {
@@ -164,6 +166,15 @@ const App: React.FC = () => {
         if (data.sensors.gas_leak && !prevData.sensors.gas_leak) notify("GAS LEAK", "Dangerous gas levels detected!", 'error');
         if (data.sensors.water_detected && !prevData.sensors.water_detected) notify("SUBMERSION ALERT", "Vehicle water entry detected!", 'error');
 
+        // Button Latch ON — reset acknowledged (only fires on false → true)
+        if (data.button_pressed && !prevData.button_pressed) {
+            notify("Reset Acknowledged", "Driver pressed reset. Accident data clears in ~12 seconds.", 'success');
+        }
+        // Button Latch OFF — system fully cleared
+        if (!data.button_pressed && prevData.button_pressed && !data.accident.detected) {
+            notify("System Cleared", "All clear — returning to normal monitoring.", 'success');
+        }
+
         // Connectivity
         if (status === "OFFLINE" && (prevData as any).status !== "OFFLINE") {
             toast.error("Vehicle Signal Lost", { id: 'offline-toast' });
@@ -197,10 +208,23 @@ const App: React.FC = () => {
                     isCritical={isCritical}
                     isDark={isDark}
                     onToggleTheme={() => setIsDark(!isDark)}
+                    buttonPressed={data.button_pressed}
+                    accidentDetected={data.accident.detected}
                 />
 
                 <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8 space-y-6">
-                    <SensorGrid data={data} status={status} />
+                    {/* EmergencyBanner disabled
+                    <EmergencyBanner
+                        isCritical={isCritical}
+                        isFresh={status === "ONLINE"}
+                        gpsFix={data.location.gps_fix}
+                        accidentDetected={data.accident.detected}
+                        stability={Math.min(100, Math.max(0, 100 - (data.sensors.gforce / 8) * 30))}
+                        lastHandshake={data.timestamp > 0 ? new Date(data.timestamp * 1000).toLocaleTimeString() : '--:--:--'}
+                        buttonPressed={data.button_pressed}
+                    />
+                    */}
+                    <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} />
 
                     <motion.div
                         initial={{ opacity: 0 }}

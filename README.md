@@ -18,11 +18,11 @@
 3. [Proposed Solution](#-proposed-solution)
 4. [System Architecture](#-system-architecture)
 5. [Hardware Part](#-hardware-part)
-- [Components List](#components-list)
-- [Pin Connection Table](#pin-connection-table)
+   - [Components List](#components-list)
+   - [Pin Connection Table](#pin-connection-table)
 6. [Software Part](#-software-part)
-- [Project Structure](#project-structure)
-- [Tech Stack & Packages](#tech-stack--packages)
+   - [Project Structure](#project-structure)
+   - [Tech Stack & Packages](#tech-stack--packages)
 7. [Firebase Database Structure](#-firebase-database-structure)
 8. [Data Flow — Step by Step](#-data-flow--step-by-step)
 9. [Online / Offline Detection](#-online--offline-detection)
@@ -72,7 +72,7 @@ LifeGuardX is designed with one goal:
 
 | Capability | How |
 |-----------|-----|
-| **Automatically detect when something goes wrong** | Monitors crash, fall, dangerous tilt, gas leak, fire, water hazard, and abnormal vibration 24/7 |
+| **Automatically detect when something goes wrong** | Monitors crash, fall, dangerous tilt, gas leak, fire, and water hazard 24/7 |
 | **Capture the exact GPS location instantly** | GPS coordinates are transmitted the moment a crash is detected |
 | **Alert even when the victim cannot** | System sends the alert automatically — no human action needed |
 | **Make accident response fast** | Reduces detection time from 20–40 minutes to **under 2 seconds** |
@@ -95,10 +95,10 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 
 | Component | Description |
 |-----------|-------------|
-| ✔ **Hardware Unit** | Monitors temperature, gas, tilt, G-force, fire, water, sound, and GPS |
+| ✔ **Hardware Unit** | Monitors temperature, gas, tilt, G-force, fire, water, and GPS |
 | ✔ **Cloud System** | Firebase Realtime Database — stores and syncs vehicle data instantly |
 | ✔ **Web Dashboard** | Displays live telemetry, maps, accident alerts, and sensor analysis |
-| ✔ **Online/Offline Detection** | Timestamp heartbeat logic — knows exactly when ESP32 goes offline |
+| ✔ **Online/Offline Detection** | Heartbeat logic — knows exactly when ESP32 goes offline within 30 seconds |
 | ✔ **Real-Time Emergency Trigger** | Dashboard receives accident alerts the instant they are detected |
 
 ---
@@ -137,19 +137,18 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 ### Components List
 
 | # | Component | Model | Purpose |
-|---|-----------|-------|---------|
+|---|-----------|-------|---------| 
 | 1 | **Microcontroller** | ESP32-S3 N16R8 | Main controller — WiFi, processing, sensor I/O |
 | 2 | **Temperature Sensor** | DHT11 | Monitor vehicle/ambient temperature |
 | 3 | **Gas Sensor** | MQ2 | Detect fuel/LPG/smoke gas leaks |
 | 4 | **Flame Sensor** | Digital Flame Sensor | Detect fire or high heat |
 | 5 | **Water Sensor** | Analog Water Level | Detect vehicle submersion / flooding |
-| 6 | **Sound Sensor** | Analog Microphone Module | Detect abnormal collision noise |
-| 7 | **IMU (Crash Detector)** | MPU6050 | Detect G-force impact, tilt, and rollover |
-| 8 | **GPS Module** | NEO-M8N | Track real-time vehicle location |
-| 9 | **Display** | 16×2 I2C LCD | Show system status locally |
-| 10 | **Buzzer** | Active Buzzer | Emergency audio alarm |
-| 11 | **LED** | Standard LED | Visual status indicator |
-| 12 | **Reset Button** | Tactile Push Button | Manual accident reset |
+| 6 | **IMU (Crash Detector)** | MPU6050 | Detect G-force impact, tilt, and rollover |
+| 7 | **GPS Module** | NEO-M8N | Track real-time vehicle location |
+| 8 | **Display** | 16×2 I2C LCD | Show system status locally |
+| 9 | **Buzzer** | Active Buzzer | Emergency audio alarm |
+| 10 | **LED** | Standard LED | Visual status indicator |
+| 11 | **Reset Button** | Tactile Push Button | Manual accident reset |
 
 ---
 
@@ -161,7 +160,6 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 | **MQ2 Gas Sensor** | AO (Analog Out) | GPIO 5 |
 | **Flame Sensor** | DO (Digital Out) | GPIO 6 *(LOW = fire detected)* |
 | **Water Sensor** | AO (Analog Out) | GPIO 10 *(> 1000 = wet)* |
-| **Sound Sensor** | AO (Analog Out) | GPIO 3 |
 | **MPU6050** | SDA | GPIO 8 |
 | **MPU6050** | SCL | GPIO 9 |
 | **LCD I2C (16×2)** | SDA | GPIO 4 |
@@ -203,12 +201,10 @@ Accident-Detection-System/
 │   ├── main.tsx                      # React DOM entry point
 │   │
 │   └── 📂 components/
-│       ├── Header.tsx                # Sticky header — branding, online/offline badge, theme toggle
-│       ├── SensorGrid.tsx            # 8-card responsive sensor display grid
+│       ├── Header.tsx                # Sticky header — online/offline badge, theme toggle
+│       ├── SensorGrid.tsx            # 7-card responsive sensor display grid
 │       ├── SensorCard.tsx            # Reusable animated card — progress bar, alert glow
-│       ├── EmergencyBanner.tsx       # Live command center bar (GPS, stability, handshake)
 │       ├── MapDisplay.tsx            # Leaflet GPS map with real-time vehicle marker
-│       ├── StatusCards.tsx           # Vehicle/system status summary
 │       └── Footer.tsx                # Page footer
 │
 ├── firebasewriter.cjs                # 🔧 One-time DB restore/reset script
@@ -228,7 +224,7 @@ Accident-Detection-System/
 #### 🖥️ Frontend Framework
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `react` | 18.3 | Core UI library |
 | `react-dom` | 18.3 | DOM rendering |
 | `typescript` | 5.6 | Type safety — zero runtime type errors |
@@ -237,7 +233,7 @@ Accident-Detection-System/
 #### 🎨 Design System
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `tailwindcss` | 4.0 | Utility-first CSS framework |
 | `lucide-react` | 0.460 | Clean, consistent sensor icons |
 | Custom CSS Variables | — | Glassmorphism UI, dark/light semantic tokens |
@@ -245,14 +241,14 @@ Accident-Detection-System/
 #### ✨ Animations & Notifications
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `framer-motion` | 11.x | Smooth entrance animations, card transitions, alert glows |
 | `react-hot-toast` | 2.6 | In-app alert toasts (accident, fire, gas, offline) |
 
 #### 🗺️ Visualization
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `leaflet` | 1.9 | Interactive GPS map with live vehicle marker |
 | `@react-google-maps/api` | 2.20 | Google Maps integration |
 | `recharts` | 2.13 | Sensor data charts/graphs |
@@ -260,13 +256,13 @@ Accident-Detection-System/
 #### ☁️ Backend / Cloud
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `firebase` | 12.9 | Realtime Database SDK — instant push updates |
 
 #### 🛠️ Utilities & Build
 
 | Package | Version | Purpose |
-|---------|---------|---------|
+|---------|---------|---------| 
 | `clsx` | 2.1 | Conditional CSS class names |
 | `tailwind-merge` | 2.5 | Merge conflicting Tailwind classes |
 | `autoprefixer` | 10.4 | CSS vendor prefix compatibility |
@@ -280,33 +276,34 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
 
 ```json
 {
-"accidentState": {
+  "accidentState": {
     "accident": {
-    "detected": false,
-    "severity": "SAFE"
+      "detected": false,
+      "severity": "SAFE"
     },
+    "button_pressed": false,
+    "button_raw": false,
     "location": {
-    "gps_fix": false,
-    "latitude": 0,
-    "longitude": 0
+      "gps_fix": false,
+      "latitude": 0,
+      "longitude": 0
     },
     "online": true,
     "sensors": {
-    "fire": false,
-    "gas_leak": false,
-    "gforce": 0.9,
-    "sound_level": 4095,
-    "temperature": 25.4,
-    "tilt_angle": -1,
-    "water_detected": false
+      "fire": false,
+      "gas_leak": false,
+      "gforce": 0.9,
+      "temperature": 25.4,
+      "tilt_angle": -1,
+      "water_detected": false
     },
     "system": {
-    "device_status": "ACTIVE",
-    "gps_fix": false
+      "device_status": "ACTIVE",
+      "gps_fix": false
     },
     "timestamp": 142,
     "vehicle_id": "VEHICLE_01"
-}
+  }
 }
 ```
 
@@ -316,6 +313,8 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
 |-------|------|-------------|
 | `accident.detected` | `boolean` | `true` when a collision is confirmed |
 | `accident.severity` | `string` | `"SAFE"` / `"MODERATE"` / `"CRITICAL"` |
+| `button_pressed` | `boolean` | `true` when the 12-second reset latch is active (debounced, ESP32 timer) |
+| `button_raw` | `boolean` | `true` when the physical button pin is held **right now** (raw GPIO state) |
 | `location.latitude` | `number` | GPS latitude in decimal degrees |
 | `location.longitude` | `number` | GPS longitude in decimal degrees |
 | `location.gps_fix` | `boolean` | `true` when satellite lock is achieved |
@@ -323,9 +322,8 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
 | `sensors.fire` | `boolean` | Flame sensor triggered |
 | `sensors.gas_leak` | `boolean` | MQ2 above toxic threshold |
 | `sensors.gforce` | `number` | Impact force in G (MPU6050) |
-| `sensors.sound_level` | `number` | Ambient sound (0–4095 ADC range) |
-| `sensors.temperature` | `number` | Temperature in °C |
-| `sensors.tilt_angle` | `number` | Vehicle roll in degrees |
+| `sensors.temperature` | `number` | Temperature in °C (DHT11) |
+| `sensors.tilt_angle` | `number` | Vehicle roll in degrees (MPU6050) |
 | `sensors.water_detected` | `boolean` | Water submersion sensor |
 | `timestamp` | `number` | Increments every ESP32 loop — heartbeat counter |
 | `vehicle_id` | `string` | Vehicle identifier |
@@ -345,7 +343,6 @@ STEP 1 — ESP32 reads all sensors (every 100ms)
 ├── MQ2        → Gas level
 ├── Flame Snsr → Fire detection
 ├── Water Snsr → Submersion
-├── Sound Snsr → Ambient noise
 └── NEO-M8N   → GPS coordinates
 
 STEP 2 — ESP32 applies accident logic
@@ -365,32 +362,33 @@ STEP 5 — Dashboard receives data (React onValue() listener)
 ├── GPS map repositions marker
 ├── Accident alerts trigger if detected = true
 └── Online/offline badge updates
-
 ```
 
 ---
 
 ## 📶 Online / Offline Detection
 
-The system uses a **timestamp heartbeat strategy** — not just a simple `online: true` flag — because if the ESP32 loses power abruptly, it cannot set `online: false`. The `timestamp` naturally stops incrementing when the ESP is off.
+The dashboard uses a **Firebase-push heartbeat strategy** — every time a new data snapshot arrives from Firebase, the `lastAdvance` timestamp is refreshed. If no update is received for **30 seconds**, the system declares the ESP32 offline.
+
+> This is more reliable than comparing `timestamp` increments alone — it correctly handles cases where the ESP32 sends data without the timestamp value changing.
 
 ```
-ESP32 ON  → timestamp: 142 → 143 → 144 → isFresh = true  → ✅ ONLINE
-ESP32 OFF → timestamp: frozen at 144           → after 10s → ❌ OFFLINE
-ESP32 ON  → timestamp: 145 → 146 → 147 → isFresh = true  → ✅ ONLINE
+ESP32 ON  → Firebase push received → lastAdvance refreshed → ✅ ONLINE
+ESP32 OFF → No push for 30s        → heartbeat timeout     → ❌ OFFLINE
+ESP32 ON  → Firebase push received → lastAdvance refreshed → ✅ ONLINE
 ```
 
 ### In the UI (`App.tsx`) — Client-Side Detection
 
 ```ts
-// Track when timestamp last moved
-if (state.timestamp !== lastSeenRef.current.ts) {
-lastSeenRef.current = { ts: state.timestamp, lastAdvance: Date.now() };
-}
+// On every Firebase snapshot — refresh lastAdvance regardless of timestamp value
+const now = Date.now();
+lastSeenRef.current = { ts: state.timestamp, lastAdvance: now };
 
-// Every 1 second — check how long since timestamp moved
+// Every 1 second — check how long since a Firebase update was received
 const timeSinceLastAdvance = (Date.now() - lastSeenRef.current.lastAdvance) / 1000;
-setStatus(timeSinceLastAdvance < 10 ? "ONLINE" : "OFFLINE");
+const HEARTBEAT_TIMEOUT = 30;
+setStatus(timeSinceLastAdvance < HEARTBEAT_TIMEOUT ? "ONLINE" : "OFFLINE");
 ```
 
 **When offline:** All sensor cards immediately display zeros (not stale data), status badge turns red and pulses.
@@ -399,26 +397,34 @@ setStatus(timeSinceLastAdvance < 10 ? "ONLINE" : "OFFLINE");
 
 ## ✨ Dashboard Features
 
-### 🎛️ Live Sensor Cards (8 Cards)
+### 🎛️ Live Sensor Cards (7 Cards)
 
 | Card | Sensor | Alert Threshold |
 |------|--------|-----------------|
-| **Accident Shield** | `gforce`, `tilt`, `accident` | Any collision detected |
+| **Accident Shield** | `gforce`, `tilt`, `accident` | Any collision detected — shows `RESETTED` when button held |
 | **Impact Force** | `gforce` (G) | > 2.5 G |
 | **Chassis Tilt** | `tilt_angle` (°) | > ±35° |
 | **Fire Sentinel** | `fire` | Triggered |
 | **Atmosphere** | `gas_leak` | Triggered |
 | **Submersion** | `water_detected` | Triggered |
-| **Acoustics** | `sound_level` (%) | Display only |
 | **Thermal Core** | `temperature` (°C) | > 50°C |
 
 Each card has: animated progress bar · color-coded status badge · neon alert glow · Framer Motion animation
+
+### 🔧 Hardware Debug Panel
+
+A collapsible debug panel at the bottom of the sensor grid exposes raw hardware state:
+
+| Debug Field | Description |
+|-------------|-------------|
+| **Button Latch** | Shows `TRUE` when the 12-second ESP32 timer latch is active |
+| **Button Raw** | Shows `PRESSED` when the physical button is **currently held** (live GPIO pin) |
 
 ### 🚨 Emergency Alerts
 - Full-screen ambient red glow on accident detection
 - 3-segment severity matrix: `SAFE → MODERATE → CRITICAL`
 - Browser Notification API — native OS notifications
-- Toast notifications for: accident, fire, gas leak, submersion, online/offline
+- Toast notifications for: accident, fire, gas leak, submersion, reset acknowledged, system cleared, online/offline
 
 ### 🗺️ GPS Map
 - Interactive **Leaflet.js** map with live vehicle position
@@ -451,7 +457,11 @@ cd Accident-Detection-System
 # 2. Install dependencies
 npm install
 
-# 3. Start the dev server
+# 3. Copy the env example and set your Firebase URL
+cp .env.example .env
+# Edit .env and set VITE_FIREBASE_DATABASE_URL and FIREBASE_DATABASE_URL
+
+# 4. Start the dev server
 npm run dev
 ```
 
