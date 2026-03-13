@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Maximize2, MapPin, Navigation } from 'lucide-react';
+import { Maximize2, MapPin } from 'lucide-react';
 
 interface MapDisplayProps {
     latitude: number;
@@ -11,7 +11,6 @@ interface MapDisplayProps {
     status: string;
 }
 
-// Fix for default Leaflet icon issue in React/Vite
 const blueIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -30,67 +29,79 @@ const redIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+// ─── DEFAULT FALLBACK LOCATION ───────────────────────────────────────────────
+// Used when gps_fix === false (device offline or GPS not acquired yet).
+// Replace these values with your default/home location.
+const FALLBACK_LAT = 14.2262; // ← change latitude here
+const FALLBACK_LNG = 79.1384;  // ← change longitude here
+// ─────────────────────────────────────────────────────────────────────────────
+
 const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDetected, gpsFix, status }) => {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<L.Map | null>(null);
     const markerRef = useRef<L.Marker | null>(null);
 
     const isOnline = status === "ONLINE";
-    const hasValidCoords = isOnline && latitude !== 0 && longitude !== 0 && gpsFix;
 
+    // ── COORDINATE RESOLUTION ──────────────────────────────────────────────
+    // gps_fix: true  → use live lat/lng from Firebase DB (sensor data)
+    //                   latitude  ← db: accidentState.location.latitude
+    //                   longitude ← db: accidentState.location.longitude
+    //
+    // gps_fix: false → GPS not ready; fall back to hardcoded FALLBACK_LAT/LNG
+    //                   (see constants above to update the fallback location)
+    // ──────────────────────────────────────────────────────────────────────
+    const displayLat = gpsFix ? latitude  : FALLBACK_LAT;
+    const displayLng = gpsFix ? longitude : FALLBACK_LNG;
+
+    // Initialise map once — always centred on the resolved coords
     useEffect(() => {
         if (!mapRef.current) return;
 
-        // Initialize map
         if (!mapInstanceRef.current) {
             mapInstanceRef.current = L.map(mapRef.current, {
                 zoomControl: true,
                 attributionControl: true
-            }).setView([latitude || 0, longitude || 0], 15);
+            }).setView([FALLBACK_LAT, FALLBACK_LNG], 15); // initial centre = fallback
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(mapInstanceRef.current);
+
+            // Permanent marker — starts at fallback, moves when GPS fix arrives
+            markerRef.current = L.marker([FALLBACK_LAT, FALLBACK_LNG], { icon: blueIcon })
+                .addTo(mapInstanceRef.current)
+                .bindPopup('<b>Vehicle Location</b>')
+                .openPopup();
         }
 
         return () => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
+                markerRef.current = null;
             }
         };
     }, []);
 
+    // Update map view + marker whenever coords or accident state changes
     useEffect(() => {
-        if (!mapInstanceRef.current) return;
+        if (!mapInstanceRef.current || !markerRef.current) return;
 
-        if (hasValidCoords) {
-            const pos: L.LatLngExpression = [latitude, longitude];
+        // displayLat/displayLng is already resolved above:
+        //   • gpsFix true  → real coordinates from DB
+        //   • gpsFix false → FALLBACK_LAT / FALLBACK_LNG
+        const pos: L.LatLngExpression = [displayLat, displayLng];
 
-            // Update view
-            mapInstanceRef.current.setView(pos, 15);
+        mapInstanceRef.current.setView(pos, 15);
+        markerRef.current.setLatLng(pos);
+        markerRef.current.setIcon(accidentDetected ? redIcon : blueIcon);
+        markerRef.current.getPopup()?.setContent(
+            accidentDetected ? '<b>Accident Detected Here!</b>' : '<b>Vehicle Location</b>'
+        );
+    }, [displayLat, displayLng, accidentDetected]);
 
-            // Update or create marker
-            if (markerRef.current) {
-                markerRef.current.setLatLng(pos);
-                markerRef.current.setIcon(accidentDetected ? redIcon : blueIcon);
-                markerRef.current.getPopup()?.setContent(accidentDetected ? "<b>Accident Detected Here!</b>" : "<b>Current Vehicle Location</b>");
-            } else {
-                markerRef.current = L.marker(pos, { icon: accidentDetected ? redIcon : blueIcon })
-                    .addTo(mapInstanceRef.current)
-                    .bindPopup(accidentDetected ? "<b>Accident Detected Here!</b>" : "<b>Current Vehicle Location</b>")
-                    .openPopup();
-            }
-        } else {
-            // Remove marker if GPS lost or offline
-            if (markerRef.current) {
-                markerRef.current.remove();
-                markerRef.current = null;
-            }
-        }
-    }, [latitude, longitude, accidentDetected, hasValidCoords, isOnline]);
-
-    const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+    const googleMapsUrl = `https://www.google.com/maps?q=${displayLat},${displayLng}`;
 
     return (
         <div className="glass-card overflow-hidden !p-0 border border-color shadow-2xl relative flex flex-col h-[480px]">
@@ -100,43 +111,32 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDe
                     <div>
                         <h3 className="text-sm font-black tracking-tight">Live Satellite Tracking</h3>
                         <p className="text-[10px] font-bold text-muted uppercase tracking-widest leading-none">
-                            {hasValidCoords ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : (isOnline ? "GPS SIGNAL LOST" : "SYSTEM LINK OFFLINE")}
+                            {/* Shows live coords when GPS fix is active, fallback otherwise */}
+                            {gpsFix
+                                ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+                                : `${FALLBACK_LAT.toFixed(6)}, ${FALLBACK_LNG.toFixed(6)}`}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    {hasValidCoords && (
-                        <button
-                            onClick={() => window.open(googleMapsUrl, '_blank')}
-                            className="p-2 rounded-xl hover:bg-primary/10 text-primary transition-colors"
-                            title="Open in Google Maps"
-                        >
-                            <Maximize2 className="w-4 h-4" />
-                        </button>
-                    )}
+                    {/* Open in Google Maps — always visible */}
+                    <button
+                        onClick={() => window.open(googleMapsUrl, '_blank')}
+                        className="p-2 rounded-xl hover:bg-primary/10 text-primary transition-colors"
+                        title="Open in Google Maps"
+                    >
+                        <Maximize2 className="w-4 h-4" />
+                    </button>
+                    {/* GPS status badge */}
+                    <span className={`text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest ${gpsFix ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                        {gpsFix ? 'GPS LIVE' : isOnline ? 'NO FIX' : 'OFFLINE'}
+                    </span>
                 </div>
             </div>
 
+            {/* Map always renders — no spinner overlay */}
             <div className="flex-1 relative">
                 <div ref={mapRef} className="absolute inset-0 z-0" style={{ height: '400px' }} />
-
-                {!hasValidCoords && (
-                    <div className="absolute inset-0 z-20 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-                        <div className="relative">
-                            <div className="w-16 h-16 border-4 border-primary/20 rounded-full" />
-                            <div className="absolute inset-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                            <Navigation className={`absolute inset-0 m-auto w-6 h-6 ${isOnline ? 'text-primary' : 'text-danger'} animate-pulse`} />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm font-black text-main uppercase tracking-widest">
-                                {isOnline ? "Searching for GPS Fix..." : "Device Connection Lost"}
-                            </p>
-                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1">
-                                {isOnline ? "Satellite triangulation in progress" : "Awaiting heartbeat signal reset"}
-                            </p>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

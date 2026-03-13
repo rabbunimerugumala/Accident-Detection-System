@@ -75,6 +75,17 @@ function firebasePatch(path, payload) {
 const OFFLINE_STATE = {
     accident: { detected: false, severity: "SAFE" },
     button_pressed: false,
+    button_raw: false,
+    evidence: {
+        cam1_url: "",
+        cam1_label: "Road Scene",
+        cam1_ready: false,
+        cam2_url: "",
+        cam2_label: "Driver Condition",
+        cam2_ready: false,
+        captured_at: 0,
+        accident_id: ""
+    },
     location: { gps_fix: false, latitude: 0, longitude: 0 },
     online: false,
     sensors: {

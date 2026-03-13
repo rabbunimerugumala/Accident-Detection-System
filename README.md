@@ -283,6 +283,16 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
     },
     "button_pressed": false,
     "button_raw": false,
+    "evidence": {
+      "cam1_url": "",
+      "cam1_label": "Road Scene",
+      "cam1_ready": false,
+      "cam2_url": "",
+      "cam2_label": "Driver Condition",
+      "cam2_ready": false,
+      "captured_at": 0,
+      "accident_id": ""
+    },
     "location": {
       "gps_fix": false,
       "latitude": 0,
@@ -315,6 +325,14 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
 | `accident.severity` | `string` | `"SAFE"` / `"MODERATE"` / `"CRITICAL"` |
 | `button_pressed` | `boolean` | `true` when the 12-second reset latch is active (debounced, ESP32 timer) |
 | `button_raw` | `boolean` | `true` when the physical button pin is held **right now** (raw GPIO state) |
+| `evidence.cam1_url` | `string` | URL of the first camera evidence image |
+| `evidence.cam1_label` | `string` | Label for the first camera (e.g., "Road Scene") |
+| `evidence.cam1_ready` | `boolean` | `true` when camera 1 image is captured and uploaded |
+| `evidence.cam2_url` | `string` | URL of the second camera evidence image |
+| `evidence.cam2_label` | `string` | Label for the second camera (e.g., "Driver Condition") |
+| `evidence.cam2_ready` | `boolean` | `true` when camera 2 image is captured and uploaded |
+| `evidence.captured_at` | `number` | Unix timestamp of when the evidence was captured |
+| `evidence.accident_id` | `string` | Unique identifier linking the evidence to an accident event |
 | `location.latitude` | `number` | GPS latitude in decimal degrees |
 | `location.longitude` | `number` | GPS longitude in decimal degrees |
 | `location.gps_fix` | `boolean` | `true` when satellite lock is achieved |

@@ -8,6 +8,7 @@ import { FirebaseData } from './types';
 // Modular Components
 import Header from './components/Header';
 import SensorGrid from './components/SensorGrid';
+import EvidenceSection from './components/EvidenceSection';
 import MapDisplay from './components/MapDisplay';
 import Footer from './components/Footer';
 // EmergencyBanner disabled for now
@@ -25,6 +26,16 @@ const INITIAL_STATE: FirebaseData['accidentState'] = {
     accident: { detected: false, severity: "SAFE" },
     button_pressed: false,
     button_raw: false,
+    evidence: {
+        cam1_url: "",
+        cam1_label: "Road Scene",
+        cam1_ready: false,
+        cam2_url: "",
+        cam2_label: "Driver Condition",
+        cam2_ready: false,
+        captured_at: 0,
+        accident_id: ""
+    },
     location: { gps_fix: false, latitude: 0, longitude: 0 },
     online: false,
     sensors: {
@@ -94,14 +105,21 @@ const App: React.FC = () => {
                 const state = rawData.accidentState || rawData;
 
                 if (state && typeof state === 'object' && 'timestamp' in state) {
-                    setData(state);
+                    // Critical Fix: Firebase data has `evidence` at the root of `rawData`, 
+                    // not inside the nested `accidentState` node. We must merge it back in.
+                    const mergedData = {
+                        ...state,
+                        evidence: rawData.evidence || INITIAL_STATE.evidence
+                    };
+
+                    setData(mergedData);
                     setStatus("ONLINE");
 
                     // Always refresh lastAdvance on ANY Firebase update.
                     // Previously only updated when timestamp changed — this caused
                     // false OFFLINE when ESP32 sent data without changing the timestamp.
                     const now = Date.now();
-                    lastSeenRef.current = { ts: state.timestamp, lastAdvance: now };
+                    lastSeenRef.current = { ts: mergedData.timestamp, lastAdvance: now };
                 }
             }
         }, (error) => {
@@ -213,23 +231,15 @@ const App: React.FC = () => {
                 />
 
                 <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8 space-y-6">
-                    {/* EmergencyBanner disabled
-                    <EmergencyBanner
-                        isCritical={isCritical}
-                        isFresh={status === "ONLINE"}
-                        gpsFix={data.location.gps_fix}
-                        accidentDetected={data.accident.detected}
-                        stability={Math.min(100, Math.max(0, 100 - (data.sensors.gforce / 8) * 30))}
-                        lastHandshake={data.timestamp > 0 ? new Date(data.timestamp * 1000).toLocaleTimeString() : '--:--:--'}
-                        buttonPressed={data.button_pressed}
-                    />
-                    */}
-                    <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} />
+                    {/* 1. TOP CARD (Accident Shield) */}
+                    <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} showOnlyHero={true} />
 
+                    {/* 2. MAP DISPLAY */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
+                        className="px-2"
                     >
                         <MapDisplay
                             latitude={data.location.latitude}
@@ -239,6 +249,12 @@ const App: React.FC = () => {
                             status={status}
                         />
                     </motion.div>
+
+                    {/* 3. EVIDENCE */}
+                    <EvidenceSection data={data.evidence} />
+
+                    {/* 4. BOTTOM SENSORS (Excluding Hero card) */}
+                    <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} showOnlySensors={true} />
                 </main>
 
                 <Footer />

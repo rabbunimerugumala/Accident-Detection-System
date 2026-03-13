@@ -11,10 +11,12 @@ interface SensorGridProps {
     data: FirebaseData['accidentState'];
     status: string;
     buttonRaw: boolean;
+    showOnlyHero?: boolean;
+    showOnlySensors?: boolean;
 }
 
 
-const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw }) => {
+const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOnlyHero, showOnlySensors }) => {
     const isOnline = status === "ONLINE";
     const [debugOpen, setDebugOpen] = useState(false);
 
@@ -53,9 +55,10 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw }) => {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-2 pb-20"
+            className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-2 ${!showOnlyHero ? 'pb-20' : ''}`}
         >
             {/* HERO: ACCIDENT STATUS (Full width) */}
+            {!showOnlySensors && (
             <motion.div variants={item} className="col-span-1 md:col-span-2 xl:col-span-3">
                 <SensorCard
                     isHero
@@ -84,7 +87,10 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw }) => {
                     </div>
                 </SensorCard>
             </motion.div>
+            )}
 
+            {!showOnlyHero && (
+                <>
             {/* IMPACT FORCE */}
             <motion.div variants={item}>
                 <SensorCard
@@ -247,6 +253,8 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw }) => {
                     </AnimatePresence>
                 </div>
             </motion.div>
+            </>
+            )}
         </motion.div>
     );
 };
