@@ -104,13 +104,13 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDe
     const googleMapsUrl = `https://www.google.com/maps?q=${displayLat},${displayLng}`;
 
     return (
-        <div className="glass-card overflow-hidden !p-0 border border-color shadow-2xl relative flex flex-col h-[480px]">
-            <div className="p-4 border-b border-color flex items-center justify-between bg-white/5 z-10">
-                <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    <div>
-                        <h3 className="text-sm font-black tracking-tight">Live Satellite Tracking</h3>
-                        <p className="text-[10px] font-bold text-muted uppercase tracking-widest leading-none">
+        <div className="glass-card overflow-hidden !p-0 border border-color shadow-2xl relative flex flex-col h-[350px] md:h-[480px]">
+            <div className="p-3 sm:p-4 border-b border-color flex items-center justify-between bg-white/5 z-10">
+                <div className="flex items-center gap-2 min-w-0">
+                    <MapPin className="w-5 h-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-black tracking-tight truncate">Live Satellite Tracking</h3>
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-widest leading-none truncate mt-1">
                             {/* Shows live coords when GPS fix is active, fallback otherwise */}
                             {gpsFix
                                 ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
@@ -135,8 +135,8 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDe
             </div>
 
             {/* Map always renders — no spinner overlay */}
-            <div className="flex-1 relative">
-                <div ref={mapRef} className="absolute inset-0 z-0" style={{ height: '400px' }} />
+            <div className="flex-1 relative min-h-0">
+                <div ref={mapRef} className="absolute inset-0 z-0 bg-white/5" style={{ height: '100%', width: '100%' }} />
             </div>
         </div>
     );

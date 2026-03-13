@@ -54,8 +54,8 @@ const SensorCard: React.FC<SensorCardProps> = ({
             <div className={`flex justify-between items-start z-10 relative ${isHero ? 'mb-4' : ''}`}>
                 <div className="flex-1">
                     <span className="label-pro tracking-[0.4em]">{title}</span>
-                    <div className="flex items-baseline gap-2 mt-3">
-                        <div className="relative overflow-hidden h-16 lg:h-20 flex items-center">
+                    <div className="flex items-baseline gap-2 mt-3 w-full">
+                        <div className="relative overflow-visible flex items-center w-full">
                             <AnimatePresence mode="wait">
                                 <motion.span
                                     key={value}
@@ -63,7 +63,7 @@ const SensorCard: React.FC<SensorCardProps> = ({
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.3 }}
-                                    className={`${isHero ? 'text-7xl lg:text-8xl' : 'text-5xl lg:text-6xl'} font-black text-main tracking-tighter`}
+                                    className={`${isHero ? 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl' : 'text-4xl sm:text-5xl lg:text-6xl'} font-black text-main tracking-tighter`}
                                 >
                                     {value}
                                 </motion.span>
@@ -129,8 +129,8 @@ const SensorCard: React.FC<SensorCardProps> = ({
                 {/* Bottom Section: Status & Children */}
                 <div className="flex flex-col gap-4">
                     {status && (
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-[120px]">
                                 <span className="text-[10px] font-black tracking-widest uppercase opacity-70" style={{ color: statusColor }}>
                                     {status}
                                 </span>

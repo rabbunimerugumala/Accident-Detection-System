@@ -126,11 +126,11 @@ export default function EvidenceSection({ data }: EvidenceSectionProps) {
         <div className="w-full flex flex-col gap-5 px-2">
             
             {/* Section Header */}
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
-                        <h2 className="text-xl md:text-2xl font-bold text-white tracking-widest uppercase">
-                            Evidence Capture <span className="text-slate-500 font-normal ml-2">— Road + Driver</span>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-1.5 h-6 bg-blue-500 rounded-full shrink-0" />
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-widest uppercase truncate">
+                            Evidence Capture <span className="text-slate-500 font-normal ml-2 hidden xs:inline">— Road Scene</span>
                         </h2>
                     </div>
 

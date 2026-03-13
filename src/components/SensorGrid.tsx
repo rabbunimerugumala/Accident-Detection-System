@@ -73,9 +73,9 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
                 >
                     {/* Severity Matrix */}
                     <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/5 backdrop-blur-sm">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-[11px] font-[1000] text-secondary uppercase tracking-[0.2em]">Severity Matrix</span>
-                            <span className={`text-[11px] font-[1000] uppercase tracking-wider ${accident.detected ? 'text-red-500' : 'text-emerald-700 dark:text-emerald-500'}`}>
+                        <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                            <span className="text-[10px] sm:text-[11px] font-[1000] text-secondary uppercase tracking-[0.2em] whitespace-nowrap">Severity Matrix</span>
+                            <span className={`text-[10px] sm:text-[11px] font-[1000] uppercase tracking-wider ${accident.detected ? 'text-red-500' : 'text-emerald-700 dark:text-emerald-500'} whitespace-nowrap`}>
                                 {accident.detected ? `Logic: ${accident.severity} Impact` : 'Safe Operation'}
                             </span>
                         </div>
