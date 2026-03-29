@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
     Flame, Wind, Droplets, Zap, RotateCw,
-    Thermometer, Shield, Bug
+    Thermometer, Bug
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FirebaseData } from '../types';
+import { FirebaseData, VictimSeverityData } from '../types';
 import SensorCard from './SensorCard';
+import AIAccidentShield from './AIAccidentShield/AIAccidentShield';
 
 interface SensorGridProps {
     data: FirebaseData['accidentState'];
@@ -13,10 +14,11 @@ interface SensorGridProps {
     buttonRaw: boolean;
     showOnlyHero?: boolean;
     showOnlySensors?: boolean;
+    onBiometricUpdate?: (result: VictimSeverityData) => void;
 }
 
 
-const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOnlyHero, showOnlySensors }) => {
+const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOnlyHero, showOnlySensors, onBiometricUpdate }) => {
     const isOnline = status === "ONLINE";
     const [debugOpen, setDebugOpen] = useState(false);
 
@@ -60,32 +62,13 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
             {/* HERO: ACCIDENT STATUS (Full width) */}
             {!showOnlySensors && (
             <motion.div variants={item} className="col-span-1 md:col-span-2 xl:col-span-3">
-                <SensorCard
-                    isHero
-                    title="Accident Shield & Severity"
-                    value={accident.detected ? accident.severity : buttonPressed ? "RESETTED" : "SECURE"}
-                    icon={Shield}
-                    iconType={accident.detected ? "rose" : "shield"}
-                    status={accident.detected ? "CRITICAL ALERT" : buttonPressed ? "BUTTON PRESSED — ALERT CLEARED" : "MONITORING"}
-                    statusColor={accident.detected ? "var(--accent-rose)" : "var(--accent-emerald)"}
-                    iconColor={accident.detected ? "var(--accent-rose)" : "var(--accent-blue)"}
-                    alert={accident.detected}
-                >
-                    {/* Severity Matrix */}
-                    <div className="mt-4 p-4 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/5 backdrop-blur-sm">
-                        <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-                            <span className="text-[10px] sm:text-[11px] font-[1000] text-secondary uppercase tracking-[0.2em] whitespace-nowrap">Severity Matrix</span>
-                            <span className={`text-[10px] sm:text-[11px] font-[1000] uppercase tracking-wider ${accident.detected ? 'text-red-500' : 'text-emerald-700 dark:text-emerald-500'} whitespace-nowrap`}>
-                                {accident.detected ? `Logic: ${accident.severity} Impact` : 'Safe Operation'}
-                            </span>
-                        </div>
-                        <div className="flex gap-2">
-                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
-                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && (accident.severity === 'MODERATE' || accident.severity === 'CRITICAL') ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
-                            <div className={`severity-matrix-segment transition-all duration-700 ${accident.detected && accident.severity === 'CRITICAL' ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] neon-pulse border-red-500/50' : ''}`} />
-                        </div>
-                    </div>
-                </SensorCard>
+                <AIAccidentShield
+                    sensors={sensors}
+                    accident={accident}
+                    evidence={data.evidence}
+                    vehicleId={data.vehicle_id}
+                    onBiometricUpdate={onBiometricUpdate}
+                />
             </motion.div>
             )}
 
@@ -187,7 +170,10 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
 
             {/* ── DEBUG PANEL ── */}
             <motion.div variants={item} className="col-span-1 md:col-span-2 xl:col-span-3">
-                <div className="rounded-2xl border border-white/10 dark:border-white/5 bg-white/5 dark:bg-white/[0.02] overflow-hidden">
+                <div
+                    className="rounded-2xl overflow-hidden transition-all duration-300"
+                    style={{ border: '1px solid var(--border-color)', background: 'var(--bg-card)' }}
+                >
                     <button
                         onClick={() => setDebugOpen(o => !o)}
                         className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/5 transition-colors group"

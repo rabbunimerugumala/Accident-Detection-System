@@ -40,3 +40,29 @@ export interface FirebaseData {
         vehicle_id: string;
     };
 }
+
+export interface VictimSeverityData {
+  severity: 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  consciousness: 'CONSCIOUS' | 'UNCONSCIOUS' | 'UNCERTAIN';
+  eyeStatus: 'OPEN' | 'CLOSED' | 'BLINKING' | 'UNKNOWN';
+  expressions: any | null;
+  confidence: number;
+  analyzing: boolean;
+  timestamp: number;
+  error?: string;
+}
+
+export interface AIAnalysisResult {
+  riskScore: number;           // 0.0 to 1.0
+  situation: string;           // human readable situation
+  confidence: number;          // 0.85 to 0.97
+  inferenceMs: number;         // actual inference time
+  activeRules: string[];       // which fusion rules fired
+  sensorWeights: {
+    name: string;
+    normalizedValue: number;   // 0-1
+    weight: number;            // effective weight after rule exclusions
+    suppressed: boolean;       // true if rule excluded this sensor
+    suppressReason?: string;   // why it was suppressed
+  }[];
+}

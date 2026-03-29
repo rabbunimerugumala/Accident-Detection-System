@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import toast, { Toaster } from 'react-hot-toast';
-import { FirebaseData } from './types';
+import { FirebaseData, VictimSeverityData } from './types';
 
 // Modular Components
 import Header from './components/Header';
 import SensorGrid from './components/SensorGrid';
-import EvidenceSection from './components/EvidenceSection';
 import MapDisplay from './components/MapDisplay';
+import AIRiskAnalyzer from './components/AIRiskAnalyzer';
 import Footer from './components/Footer';
 // EmergencyBanner disabled for now
 // import EmergencyBanner from './components/EmergencyBanner';
@@ -71,6 +71,8 @@ const App: React.FC = () => {
         return true; // Default to dark for Pro version
     });
 
+    const [biometricResult, setBiometricResult] = useState<VictimSeverityData | null>(null);
+
     const prevData = usePrevious(data);
     const lastSeenRef = useRef<{ ts: number, lastAdvance: number }>({ ts: -1, lastAdvance: Date.now() });
 
@@ -78,14 +80,13 @@ const App: React.FC = () => {
     useEffect(() => {
         if (isDark) {
             document.documentElement.classList.add('dark');
-            document.documentElement.classList.remove('light');
             localStorage.setItem('theme', 'dark');
         } else {
-            document.documentElement.classList.add('light');
             document.documentElement.classList.remove('dark');
             localStorage.setItem('theme', 'light');
         }
     }, [isDark]);
+
 
     // Browser Notification Permission
     useEffect(() => {
@@ -232,7 +233,16 @@ const App: React.FC = () => {
 
                 <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8 space-y-6">
                     {/* 1. TOP CARD (Accident Shield) */}
-                    <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} showOnlyHero={true} />
+                    <SensorGrid 
+                        data={data} 
+                        status={status} 
+                        buttonRaw={data.button_raw ?? false} 
+                        showOnlyHero={true} 
+                        onBiometricUpdate={setBiometricResult}
+                    />
+
+                    {/* AI RISK ANALYSIS ENGINE */}
+                    <AIRiskAnalyzer data={data} biometricResult={biometricResult} status={status} />
 
                     {/* 2. MAP DISPLAY */}
                     <motion.div
@@ -250,10 +260,7 @@ const App: React.FC = () => {
                         />
                     </motion.div>
 
-                    {/* 3. EVIDENCE */}
-                    <EvidenceSection data={data.evidence} />
-
-                    {/* 4. BOTTOM SENSORS (Excluding Hero card) */}
+                    {/* 3. BOTTOM SENSORS (Excluding Hero card) */}
                     <SensorGrid data={data} status={status} buttonRaw={data.button_raw ?? false} showOnlySensors={true} />
                 </main>
 

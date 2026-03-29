@@ -1,5 +1,5 @@
 # 🛡️ LifeGuardX
-### Intelligent Accident Detection & Real-Time Telemetry System
+### Intelligent Accident Detection & Real-Time Telemetry System (AI Integrated)
 
 ![ESP32-S3](https://img.shields.io/badge/ESP32--S3-Firmware-E7352C?logo=espressif&logoColor=white&style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white&style=for-the-badge)
@@ -109,26 +109,71 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                             LIFEGUARDX SYSTEM                                │
 │                                                                              │
-│  ┌─────────────────────────────┐                                             │
+│  ┌──────────────────────────────┐                                             │
 │  │       HARDWARE LAYER        │                                             │
 │  │                             │                                             │
-│  │  Sensors → ESP32-S3 →WiFi──┼──────────────────────────────────────────┐  │
-│  │  (reads every 100ms)        │                                          │  │
-│  │  (uploads every ~1s)        │                                          ▼  │
-│  └─────────────────────────────┘                                             │
-│                                                                              │
+│  │  Sensors → ESP32-S3 → WiFi ──┼────────────────────────────────────────┐  │
+│  │  (reads every 100ms)         │                                          │  │
+│  │  (uploads every ~1-2s)       │                                          ▼  │
+│  └──────────────────────────────┘                                             │
+│          ▲                                                                    │
+│          │ (Hardware Trigger)                                                 │
+│          │                                                                    │
+│  ┌──────────────────────────────┐                                             │
+│  │     DUAL CAMERA LAYER        │                                             │
+│  │                              │                                             │
+│  │  2x ESP32-CAM (ImgBB API)    │                                             │
+│  │  - Captures on incident      │                                             │
+│  │  - Uploads evidence photos    │                                             │
+│  └──────────────────────────────┘                                             │
+│                                                                               │
 │  ┌─────────────────────────────┐      ┌──────────────────────────────────┐  │
 │  │       CLOUD LAYER           │      │       SOFTWARE LAYER              │  │
 │  │                             │      │                                   │  │
 │  │  Firebase Realtime DB       │─Push─▶  React Dashboard (Browser)       │  │
 │  │  /accidentState             │      │  - Live sensor cards              │  │
-│  │                             │      │  - GPS Map (Leaflet)              │  │
-│  │  Instant push updates       │      │  - Accident alerts (Toast)        │  │
-│  │  to all connected clients   │      │  - Online/Offline detection       │  │
-│  │                             │      │  - Dark / Light mode              │  │
+│  │  (PATCH-based updates)      │      │  - GPS Map (Leaflet)              │  │
+│  │                             │      │  - Accident alerts (Toast)        │  │
+│  │  Instant push updates       │      │  - Heartbeat Online/Offline       │  │
+│  │  to all connected clients   │      │  - Dark / Light / Mobile-ready    │  │
+│  │                             │      │  - Watchdog System                │  │
 │  └─────────────────────────────┘      └──────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🧠 AI Consciousness & Vision Engine (v3.6)
+
+LifeGuardX features a sophisticated **Dual-Engine AI Architecture** that combines real-time computer vision with a multi-sensor inference engine. This is a live neural network operating directly in the dashboard, ensuring zero-latency victim analysis.
+
+### 👁️ Core Vision Engine (Face-API.js)
+The system uses **TensorFlow.js** and **Face-API.js** to perform high-precision biometric tracking:
+- **68-Point Facial Landmark tracking**: Monitors facial geometry in real-time.
+- **Face-Relative Eye Tracking (EAR)**: Uses scientifically calibrated Eye Aspect Ratio (Soukupová & Čech 2016).
+    - **Adaptive Sensitivity**: Thresholds adjust based on expressions (e.g., more lenient during laughter or squinting).
+    - **Closure Guard**: If eye aperture falls below **2.0% of the total face scale**, the victim is flagged as **UNCONSCIOUS**.
+- **Real-Time Expression Vectors**: Monitors 7 emotional states (Neutral, Happy, Sad, Angry, Fearful, Disgusted, Surprised) to calculate the "Distress Score".
+
+### ⚖️ AI Risk Analyzer (Sensor Fusion)
+The **Inference Engine** applies a 12-rule fuzzy logic matrix to fuse physical sensor data with biometric results:
+- **Rule 1-7 (Physics Baseline)**: Prioritizes Fire > Gas > Water > G-Force > Tilt.
+- **Rule 8 (Multi-Hazard)**: Detects catastrophic compound emergencies (e.g., Fire + Submersion).
+- **Rule 10-11 (Biometric Fusion)**: Distressed or Unconscious states act as a "Risk Multiplier," overriding physical safe zones.
+- **Rule 12 (Manual Override)**: Prioritizes human-verified high-resolution uploads over digital evidence.
+
+### 🏋️ Eye AI Trainer (Transfer Learning)
+A breakthrough feature that allows users to enhance the model's accuracy:
+- **Engine**: MobileNet v2 (Feature Vector) via TensorFlow.js.
+- **Function**: Users can upload 5–20 high-res OPEN/CLOSED eye samples to train a custom classification head in the browser.
+- **Persistence**: The trained model is saved to **IndexedDB**, ensuring custom detection profiles persist across sessions without cloud storage.
+
+### 🧪 Advanced Pre-processing Pipeline
+To handle the low-resolution/dark images typical of ESP32-CAM hardware:
+1. **Upscale & Contrast Boost**: 1.4x Contrast + 1.1x Brightness normalization.
+2. **Unsharp Masking**: Convolution kernel-based sharpening for edge clarity.
+3. **Multi-Pass Detection**: Progressive input-size cascading (160px to 608px) to find faces at varying distances.
+4. **Sub-100ms Inference**: Hardware-accelerated processing via WebGL/WebGPU.
 
 ---
 
@@ -148,7 +193,8 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 | 8 | **Display** | 16×2 I2C LCD | Show system status locally |
 | 9 | **Buzzer** | Active Buzzer | Emergency audio alarm |
 | 10 | **LED** | Standard LED | Visual status indicator |
-| 11 | **Reset Button** | Tactile Push Button | Manual accident reset |
+| 11 | **Evidence System** | 2x ESP32-CAM | Capture Road Scene & Driver Condition |
+| 12 | **Reset Button** | Tactile Push Button | Manual accident reset |
 
 ---
 
@@ -166,6 +212,8 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 | **LCD I2C (16×2)** | SCL | GPIO 7 |
 | **NEO-M8N GPS** | TX → ESP32 RX | GPIO 18 |
 | **NEO-M8N GPS** | RX → ESP32 TX | GPIO 17 |
+| **ESP32-CAM #1** | TRIGGER (IO13) | GPIO 16 (Road Scene) |
+| **ESP32-CAM #2** | TRIGGER (IO13) | GPIO 15 (Driver Condition) |
 | **Buzzer** | Signal | GPIO 11 |
 | **Reset Button** | Signal | GPIO 12 |
 | **LED** | Anode | GPIO 2 |
@@ -179,10 +227,10 @@ The ESP32 firmware uses these thresholds to classify accidents:
 | Condition | Threshold | Severity |
 |-----------|-----------|----------|
 | G-Force impact | > 2.5 G | `MODERATE` |
-| Vehicle tilt | > 45° | `MODERATE` (Rollover risk) |
+| Vehicle tilt | Deviates > 45° | `MODERATE` (Sustained 1s) |
 | G-Force impact | > 5.0 G | `CRITICAL` |
 | Fire detected | Sensor LOW | Hazard alert |
-| Gas leak | Analog > threshold | Hazard alert |
+| Gas leak | Analog > 2200 | Hazard alert |
 | Water entry | Analog > 1000 | Hazard alert |
 
 ---
@@ -209,10 +257,11 @@ Accident-Detection-System/
 │
 ├── firebasewriter.cjs                # 🔧 One-time DB restore/reset script
 │
+├── watchdog.cjs                      # 🐕 System watchdog & monitoring script
 ├── index.html                        # Vite HTML entry
-├── package.json                      # NPM config, scripts, dependencies
+├── package.json                      # NPM config (includes concurrently setup)
 ├── vite.config.ts                    # Vite bundler config
-├── tailwind.config.js                # Tailwind CSS config
+├── tailwind.config.js                # Tailwind CSS v4 config
 ├── tsconfig.json                     # TypeScript config
 └── vercel.json                       # Vercel deployment (SPA routing)
 ```
@@ -234,9 +283,10 @@ Accident-Detection-System/
 
 | Package | Version | Purpose |
 |---------|---------|---------| 
-| `tailwindcss` | 4.0 | Utility-first CSS framework |
+| `tailwindcss` | 4.0 | Utility-first CSS framework (v4 Engine) |
 | `lucide-react` | 0.460 | Clean, consistent sensor icons |
-| Custom CSS Variables | — | Glassmorphism UI, dark/light semantic tokens |
+| `clsx` / `tailwind-merge` | 2.x | Premium UI component handling |
+| Custom CSS Variables | — | Glassmorphism UI, Mobile-optimized layouts |
 
 #### ✨ Animations & Notifications
 
@@ -258,6 +308,15 @@ Accident-Detection-System/
 | Package | Version | Purpose |
 |---------|---------|---------| 
 | `firebase` | 12.9 | Realtime Database SDK — instant push updates |
+
+#### 🤖 AI & Machine Learning
+
+| Package | Version | Purpose |
+|---------|---------|---------| 
+| `face-api.js` | 0.22 | Deep facial landmark detection & expression analysis |
+| `@tensorflow/tfjs` | 4.x | Hardware-accelerated ML backend (WebGL/WebGPU) |
+| `MobileNet v2` | TFHub | Transfer learning feature extractor for eye classification |
+| `IndexedDB` | Native | Local persistence for custom-trained AI models |
 
 #### 🛠️ Utilities & Build
 
@@ -343,8 +402,11 @@ The ESP32 uploads data in this **exact JSON format** to Firebase:
 | `sensors.temperature` | `number` | Temperature in °C (DHT11) |
 | `sensors.tilt_angle` | `number` | Vehicle roll in degrees (MPU6050) |
 | `sensors.water_detected` | `boolean` | Water submersion sensor |
-| `timestamp` | `number` | Increments every ESP32 loop — heartbeat counter |
+| `timestamp` | `number` | Increments every ESP32 loop — heartbeat source |
 | `vehicle_id` | `string` | Vehicle identifier |
+
+> [!IMPORTANT]
+> **PATCH vs PUT:** The ESP32 uses `PATCH` for sensor updates to prevent overwriting the `evidence` node created by the cameras. `PUT` is used only during an accident reset to clear old evidence and generate a new `accident_id`.
 
 ---
 
@@ -376,10 +438,17 @@ STEP 4 — Firebase RTDB updates instantly
 └── Pushes the change to ALL connected clients in real-time
 
 STEP 5 — Dashboard receives data (React onValue() listener)
-├── Sensor cards update instantly
-├── GPS map repositions marker
+├── Sensor cards update instantly (responsive grid)
+├── GPS map repositions marker (Default: 14.2262, 79.1384)
 ├── Accident alerts trigger if detected = true
-└── Online/offline badge updates
+└── AI Pipeline triggers immediately:
+    ├── Pre-processing (Upscale/Contrast/Sharpen)
+    ├── Multi-pass detection (Face-API.js)
+    ├── EAR + Landmark Analysis (Consciousness Check)
+    ├── Custom Model Inference (Trained via Eye AI Trainer)
+    └── Risk Fusion Engine (Rules 1-12) calculation
+└── Evidence panel appears with real-time biometric metrics
+└── Online/offline heartbeat badge updates
 ```
 
 ---
@@ -420,14 +489,16 @@ setStatus(timeSinceLastAdvance < HEARTBEAT_TIMEOUT ? "ONLINE" : "OFFLINE");
 | Card | Sensor | Alert Threshold |
 |------|--------|-----------------|
 | **Accident Shield** | `gforce`, `tilt`, `accident` | Any collision detected — shows `RESETTED` when button held |
-| **Impact Force** | `gforce` (G) | > 2.5 G |
-| **Chassis Tilt** | `tilt_angle` (°) | > ±35° |
-| **Fire Sentinel** | `fire` | Triggered |
-| **Atmosphere** | `gas_leak` | Triggered |
-| **Submersion** | `water_detected` | Triggered |
-| **Thermal Core** | `temperature` (°C) | > 50°C |
+| **Biometric Intel** | `AI Vision` | Consciousness Tracking (Rule 11) using EAR & Landmark Tracking |
+| **Exposure HUB** | `Evidence Analysis` | Multi-source scrutinization (Firebase, Custom URL, Local Upload) |
+| **Impact Force** | `gforce` (G) | > 2.5 G (Live IMU Streaming) |
+| **Chassis Tilt** | `tilt_angle` (°) | > ±35° (Rollover Protection) |
+| **Fire Sentinel** | `fire` | Optical flame-frequency detection |
+| **Toxic Shield** | `gas_leak` | MQ2 calibration at toxic threshold |
+| **LiquiGuard** | `water_detected` | Submersion detection |
+| **Thermal Core** | `temperature` (°C) | > 50°C (Battery & Engine Health) |
 
-Each card has: animated progress bar · color-coded status badge · neon alert glow · Framer Motion animation
+Each card features: **Animated Micro-interactions** · **Dynamic Gradient Badges** · **Condition-based Glow** · **Responsive Layout**.
 
 ### 🔧 Hardware Debug Panel
 
@@ -440,8 +511,15 @@ A collapsible debug panel at the bottom of the sensor grid exposes raw hardware 
 
 ### 🚨 Emergency Alerts
 - Full-screen ambient red glow on accident detection
-- 3-segment severity matrix: `SAFE → MODERATE → CRITICAL`
-- Browser Notification API — native OS notifications
+- **3-Segment Severity Matrix**:
+    | Level | Status | Description |
+    |-------|--------|-------------|
+    | 🛡️ **SECURE** | Emerald | All systems normal, driver conscious, environment safe |
+    | ⚠️ **CAUTION** | Blue | Minor sensor deviation (e.g., slight tilt or temp rise) |
+    | 🔸 **WARNING** | Amber | Potential risk (e.g., moderate G-force, low-confidence distress) |
+    | 🔴 **CRITICAL** | Orange | Collision detected, high distress, or vehicle hazard |
+    | 🔥 **EXTREME** | Rose | **EMERGENCY**: Unconscious victim or multi-hazard catastrophe |
+- Browser Notification API — Native OS notifications
 - Toast notifications for: accident, fire, gas leak, submersion, reset acknowledged, system cleared, online/offline
 
 ### 🗺️ GPS Map
@@ -492,8 +570,10 @@ The dashboard opens at **http://localhost:5173**
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start the Vite UI dev server |
+| `npm start` | Start UI + Watchdog concurrently |
 | `npm run build` | Build production bundle to `/dist` |
 | `npm run preview` | Preview the production build locally |
+| `node watchdog.cjs` | Run only the system watchdog |
 | `node firebasewriter.cjs` | Reset Firebase DB to safe initial state |
 
 ---

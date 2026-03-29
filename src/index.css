@@ -2,23 +2,49 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #3b82f6;
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-background: #0f172a;
-    --color-card: #1e293b;
-    --color-text-main: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-muted: #64748b;
-    --color-border: rgba(255, 255, 255, 0.1);
+    /* Maps to CSS vars so they switch with light/dark mode */
+    --color-primary: var(--accent-blue);
+    --color-success: var(--accent-emerald);
+    --color-warning: var(--accent-amber);
+    --color-danger: var(--accent-rose);
+    --color-background: var(--bg-main);
+    --color-card: var(--bg-card);
+    --color-text-main: var(--text-main);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border-color);
 
     --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
     :root {
-        /* Pro Theme - Dark Default */
+        /* ── LIGHT MODE (default / no class) ── */
+        --bg-main: #f8fafc;
+        --bg-card: rgba(255, 255, 255, 0.94);
+        --bg-header: #f1f5f9;
+
+        --text-main: #0f172a;
+        --text-secondary: #334155;
+        --text-muted: #64748b;
+        --text-dim: #94a3b8;
+
+        --border-color: rgba(15, 23, 42, 0.12);
+        --border-hover: rgba(37, 99, 235, 0.4);
+
+        --accent-emerald: #059669;
+        --accent-blue: #2563eb;
+        --accent-amber: #d97706;
+        --accent-rose: #dc2626;
+        --accent-indigo: #4f46e5;
+        --accent-cyan: #0891b2;
+
+        --glass-blur: blur(22px);
+        --neon-glow: 0 0 16px rgba(37, 99, 235, 0.15);
+    }
+
+    .dark {
+        /* ── DARK MODE (.dark on <html>) ── */
         --bg-main: #020617;
         --bg-card: rgba(15, 23, 42, 0.4);
         --bg-header: rgba(2, 6, 23, 0.85);
@@ -42,40 +68,26 @@
         --neon-glow: 0 0 20px rgba(59, 130, 246, 0.3);
     }
 
-    .light {
-        --bg-main: #f1f5f9;
-        --bg-card: rgba(255, 255, 255, 0.85);
-        --bg-header: rgba(255, 255, 255, 0.9);
-
-        --text-main: #0f172a;
-        --text-secondary: #334155;
-        --text-muted: #64748b;
-        --text-dim: #94a3b8;
-
-        --border-color: rgba(15, 23, 42, 0.12);
-        --border-hover: rgba(59, 130, 246, 0.4);
-
-        --accent-emerald: #059669;
-        --accent-blue: #2563eb;
-        --accent-amber: #d97706;
-        --accent-rose: #dc2626;
-        --accent-indigo: #4f46e5;
-        --accent-cyan: #0891b2;
-
-        --glass-blur: blur(28px);
-        --neon-glow: 0 0 25px rgba(59, 130, 246, 0.2);
-    }
-
     body {
         background-color: var(--bg-main);
         color: var(--text-main);
         @apply font-sans antialiased transition-colors duration-500;
+        /* Light mode: very subtle cool tints */
+        background-image:
+            radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(8, 145, 178, 0.04) 0px, transparent 40%),
+            radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.04) 0px, transparent 50%),
+            radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.02) 0px, transparent 80%);
+        background-attachment: fixed;
+    }
+
+    .dark body {
+        /* Dark mode: stronger neon atmosphere */
         background-image:
             radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
             radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 40%),
             radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
-            radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.1) 0px, transparent 80%);
-        background-attachment: fixed;
+            radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.04) 0px, transparent 80%);
     }
 }
 
@@ -126,12 +138,14 @@
     }
 
     .severity-matrix-segment {
-        @apply h-3.5 flex-1 rounded-full transition-all duration-700 border border-slate-400/30 dark:border-white/10;
-        background-color: rgba(148, 163, 184, 0.1);
+        @apply h-3.5 flex-1 rounded-full transition-all duration-700;
+        background-color: rgba(100, 116, 139, 0.15);  /* light: slate tint */
+        border: 1px solid rgba(15, 23, 42, 0.1);
     }
 
     .dark .severity-matrix-segment {
         background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.08);
     }
 
     .icon-container {
@@ -141,9 +155,15 @@
         box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.3);
     }
 
-    .light .icon-container {
-        background-color: rgba(var(--accent-rgb), 0.2);
-        box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    /* Light mode: softer icon background with inner white ring */
+    :root .icon-container {
+        background-color: rgba(var(--accent-rgb), 0.15);
+        box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .dark .icon-container {
+        background: rgba(var(--accent-rgb), 0.25);
+        box-shadow: 0 4px 12px -2px rgba(var(--accent-rgb), 0.3);
     }
 
     .icon-glow {
@@ -177,23 +197,43 @@
     }
 
     .icon-amber {
-        --accent-rgb: 251, 191, 36;
+        /* Light: #d97706 → rgb(217,119,6) | Dark: #f59e0b → rgb(245,158,11) */
+        --accent-rgb: 217, 119, 6;
         --accent-color: var(--accent-amber);
     }
 
+    .dark .icon-amber {
+        --accent-rgb: 245, 158, 11;
+    }
+
     .icon-rose {
-        --accent-rgb: 244, 63, 94;
+        /* Light: #dc2626 → rgb(220,38,38) | Dark: #f43f5e → rgb(244,63,94) */
+        --accent-rgb: 220, 38, 38;
         --accent-color: var(--accent-rose);
     }
 
+    .dark .icon-rose {
+        --accent-rgb: 244, 63, 94;
+    }
+
     .icon-indigo {
-        --accent-rgb: 99, 102, 241;
+        /* Light: #4f46e5 → rgb(79,70,229) | Dark: #6366f1 → rgb(99,102,241) */
+        --accent-rgb: 79, 70, 229;
         --accent-color: var(--accent-indigo);
     }
 
+    .dark .icon-indigo {
+        --accent-rgb: 99, 102, 241;
+    }
+
     .icon-cyan {
-        --accent-rgb: 6, 182, 212;
+        /* Light: #0891b2 → rgb(8,145,178) | Dark: #06b6d4 → rgb(6,182,212) */
+        --accent-rgb: 8, 145, 178;
         --accent-color: var(--accent-cyan);
+    }
+
+    .dark .icon-cyan {
+        --accent-rgb: 6, 182, 212;
     }
 }
 
@@ -242,6 +282,15 @@
 
 .animate-float {
     animation: float 4s ease-in-out infinite;
+}
+
+@keyframes scan {
+    0% { top: 0% }
+    100% { top: 100% }
+}
+
+.animate-scan {
+    animation: scan 4s linear infinite;
 }
 
 /* Recharts Customization */
