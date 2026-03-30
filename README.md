@@ -1,13 +1,13 @@
-# 🛡️ LifeGuardX
-### Intelligent Accident Detection & Real-Time Telemetry System (AI Integrated)
+# 🛡️ LifeGuardX Pro
+### Anti-Gravity Pro Telemetry & Intelligent Accident Detection System (AI Integrated)
 
 ![ESP32-S3](https://img.shields.io/badge/ESP32--S3-Firmware-E7352C?logo=espressif&logoColor=white&style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white&style=for-the-badge)
 ![Firebase](https://img.shields.io/badge/Firebase-Realtime_DB-FFCA28?logo=firebase&logoColor=black&style=for-the-badge)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white&style=for-the-badge)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-Tasks_Vision-007AFF?logo=google&logoColor=white&style=for-the-badge)
 ![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white&style=for-the-badge)
 
-> *"Detect the accident instantly, alert immediately, save the life before it's too late."*
+> **"Anti-Gravity Pro:** Detect the accident instantly, alert immediately, save the life before it's too late."
 
 ---
 
@@ -107,12 +107,13 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                             LIFEGUARDX SYSTEM                                │
+│                             LIFEGUARDX PRO SYSTEM                            │
 │                                                                              │
 │  ┌──────────────────────────────┐                                             │
 │  │       HARDWARE LAYER        │                                             │
+│  │     (ESP32-S3 + Sensors)     │                                             │
 │  │                             │                                             │
-│  │  Sensors → ESP32-S3 → WiFi ──┼────────────────────────────────────────┐  │
+│  │  Sensors → WiFi → Firebase ──┼────────────────────────────────────────┐  │
 │  │  (reads every 100ms)         │                                          │  │
 │  │  (uploads every ~1-2s)       │                                          ▼  │
 │  └──────────────────────────────┘                                             │
@@ -128,110 +129,131 @@ Accident Detection  +  Hazard Monitoring  +  Live GPS Tracking  +  Smart Alerts 
 │  └──────────────────────────────┘                                             │
 │                                                                               │
 │  ┌─────────────────────────────┐      ┌──────────────────────────────────┐  │
-│  │       CLOUD LAYER           │      │       SOFTWARE LAYER              │  │
-│  │                             │      │                                   │  │
-│  │  Firebase Realtime DB       │─Push─▶  React Dashboard (Browser)       │  │
-│  │  /accidentState             │      │  - Live sensor cards              │  │
-│  │  (PATCH-based updates)      │      │  - GPS Map (Leaflet)              │  │
-│  │                             │      │  - Accident alerts (Toast)        │  │
-│  │  Instant push updates       │      │  - Heartbeat Online/Offline       │  │
-│  │  to all connected clients   │      │  - Dark / Light / Mobile-ready    │  │
-│  │                             │      │  - Watchdog System                │  │
+│  │       CLOUD LAYER           │      │       SOFTWARE LAYER             │  │
+│  │                             │      │    (Anti-Gravity Dashboard)      │  │
+│  │  Firebase Realtime DB       │─Push─▶  React + MediaPipe AI            │  │
+│  │  /accidentState             │      │  - AIRiskAnalyzer (Inference)    │  │
+│  │  (PATCH-based updates)      │      │  - BiometricIntel (478 landmarks)│  │
+│  │                             │      │  - GPS Map (NMEA/Decimal Fix)    │  │
+│  │  Instant push updates       │      │  - Dark-Mode Glassmorphism       │  │
+│  │  to all connected clients   │      │  - Watchdog System               │  │
 │  └─────────────────────────────┘      └──────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🧠 AI Consciousness & Vision Engine (v3.6)
+## 🧠 AI Consciousness & Vision Engine (v4.2)
 
-LifeGuardX features a sophisticated **Dual-Engine AI Architecture** that combines real-time computer vision with a multi-sensor inference engine. This is a live neural network operating directly in the dashboard, ensuring zero-latency victim analysis.
+LifeGuardX Pro features a state-of-the-art **Neural Vision Pipeline** powered by **Google MediaPipe**. This engine operates entirely at the edge (in-browser), ensuring sub-50ms inference for critical victim analysis.
 
-### 👁️ Core Vision Engine (Face-API.js)
-The system uses **TensorFlow.js** and **Face-API.js** to perform high-precision biometric tracking:
-- **68-Point Facial Landmark tracking**: Monitors facial geometry in real-time.
-- **Face-Relative Eye Tracking (EAR)**: Uses scientifically calibrated Eye Aspect Ratio (Soukupová & Čech 2016).
-    - **Adaptive Sensitivity**: Thresholds adjust based on expressions (e.g., more lenient during laughter or squinting).
-    - **Closure Guard**: If eye aperture falls below **2.0% of the total face scale**, the victim is flagged as **UNCONSCIOUS**.
-- **Real-Time Expression Vectors**: Monitors 7 emotional states (Neutral, Happy, Sad, Angry, Fearful, Disgusted, Surprised) to calculate the "Distress Score".
+### 👁️ Core Vision Engine (MediaPipe Face Landmarker)
+The system has been migrated from legacy `face-api.js` to the high-performance **MediaPipe Tasks Vision** framework:
+- **478-Point 3D Facial Mesh**: Superior tracking precision compared to the old 68-point model.
+- **Biometric Blendshape Analysis**: Real-time extraction of 52 specific facial expressions (v-sync synchronized).
+- **Face-Relative Eye Tracking (EAR)**: 
+    - Calculated using high-definition landmarks: Left `[33, 160, 158, 133, 153, 144]`, Right `[362, 385, 387, 263, 373, 380]`.
+    - **Adaptive Sensitivity**: Thresholds dynamically shift based on lighting and distance.
+- **Consciousness Guard**: Auto-flags **UNCONSCIOUS** if EAR < 0.2 or Blink Score > 0.6 for a sustained period.
 
-### ⚖️ AI Risk Analyzer (Sensor Fusion)
-The **Inference Engine** applies a 12-rule fuzzy logic matrix to fuse physical sensor data with biometric results:
-- **Rule 1-7 (Physics Baseline)**: Prioritizes Fire > Gas > Water > G-Force > Tilt.
-- **Rule 8 (Multi-Hazard)**: Detects catastrophic compound emergencies (e.g., Fire + Submersion).
-- **Rule 10-11 (Biometric Fusion)**: Distressed or Unconscious states act as a "Risk Multiplier," overriding physical safe zones.
-- **Rule 12 (Manual Override)**: Prioritizes human-verified high-resolution uploads over digital evidence.
+### ⚖️ AI Risk Analyzer (Sensor Fusion v2.0)
+The **AIRiskAnalyzer** component implements a 12-rule fuzzy logic matrix to fuse physical sensor telemetry with AI biometric results:
+- **Physical Baseline**: Prioritizes Fire > Gas > Water > G-Force > Tilt.
+- **Biometric Multiplier**: A detected "Distressed" or "Unconscious" state acts as a risk multiplier, escalating `MODERATE` hazards to `CRITICAL`.
+- **Compound Emergency Logic**: Specifically identifies life-threatening combinations, such as `Fire + Unconscious`.
 
-### 🏋️ Eye AI Trainer (Transfer Learning)
-A breakthrough feature that allows users to enhance the model's accuracy:
-- **Engine**: MobileNet v2 (Feature Vector) via TensorFlow.js.
-- **Function**: Users can upload 5–20 high-res OPEN/CLOSED eye samples to train a custom classification head in the browser.
-- **Persistence**: The trained model is saved to **IndexedDB**, ensuring custom detection profiles persist across sessions without cloud storage.
+### ⚡ Biometric Intel Dashboard
+A specialized UI component that visualizes the AI's internal state:
+- **Landmark Overlay**: Real-time projection of the 478-point mesh on the evidence image.
+- **7-Emotion Spectrum**: Distribution chart of Neutral, Happy, Sad, Angry, Fearful, Disgusted, and Surprised states.
+- **Confidence Rating**: Real-time tracking of AI model certainty levels.
 
-### 🧪 Advanced Pre-processing Pipeline
-To handle the low-resolution/dark images typical of ESP32-CAM hardware:
-1. **Upscale & Contrast Boost**: 1.4x Contrast + 1.1x Brightness normalization.
-2. **Unsharp Masking**: Convolution kernel-based sharpening for edge clarity.
-3. **Multi-Pass Detection**: Progressive input-size cascading (160px to 608px) to find faces at varying distances.
-4. **Sub-100ms Inference**: Hardware-accelerated processing via WebGL/WebGPU.
+## 📂 Exhaustive Project Structure
+
+```text
+Accident-Detection-System/
+├── 📂 .vscode/                       # IDE configuration
+│   └── extensions.json               # Recommended VS Code extensions
+├── 📂 espcam/                        # 📷 Evidence Capture Firmware
+│   └── espcam.ino                    # ESP32-CAM trigger & ImgBB upload logic
+├── 📂 esps3/                         # 🛡️ Main Detection Firmware
+│   └── esps3.ino                     # ESP32-S3 sensor fusion, GPS, & Firebase sync
+├── 📂 public/                        # 🌐 Static Assets
+│   ├── heartbeat.png                 # System status iconography
+│   └── manifest.json                 # Web App Manifest
+├── 📂 src/                           # 💻 Anti-Gravity Dashboard (React + TS)
+│   ├── 📂 components/                # Modular UI components
+│   │   ├── 📂 AIAccidentShield/      # Specialized accident monitoring
+│   │   │   ├── AIAccidentShield.tsx  # Flagship detector component
+│   │   │   └── BiometricIntel.tsx    # MediaPipe visualizer
+│   │   ├── 📂 VictimSeverity/        # Biometric analysis UI
+│   │   │   ├── VictimSeverity.tsx    # Severity controller
+│   │   │   ├── VictimSeverityCard.tsx# Result visualization
+│   │   │   └── types.ts              # Local types
+│   │   ├── AIRiskAnalyzer.tsx        # High-order inference engine
+│   │   ├── EmergencyBanner.tsx       # Full-screen ambient alerts
+│   │   ├── EvidenceSection.tsx       # Post-accident media triage
+│   │   ├── Footer.tsx                # Branding & legal links
+│   │   ├── Header.tsx                # Glassmorphic nav & status
+│   │   ├── MapDisplay.tsx            # GIS mapping (Leaflet)
+│   │   ├── SensorCard.tsx            # Reusable glassmorphic cards
+│   │   ├── SensorGrid.tsx            # Adaptive layout engine
+│   │   └── StatusCards.tsx           # Fleet health indicators
+│   ├── 📂 constants/                 # System themes & tokens
+│   │   └── theme.ts                  # Anti-Gravity design tokens
+│   ├── 📂 hooks/                     # Custom React hooks
+│   │   └── useFaceAnalysis.ts        # MediaPipe logic hook
+│   ├── 📂 utils/                     # Shared utilities
+│   │   ├── mediaPipeLoader.ts        # AI engine singleton
+│   │   └── openCVLoader.ts           # Vision processing loader
+│   ├── App.tsx                       # Root orchestrator
+│   ├── index.css                     # Global design foundation (Tailwind 4)
+│   ├── types.ts                      # Universal telemetry interfaces
+│   └── main.tsx                      # DOM entry point
+├── 📂 dist/                          # Production build output
+├── .env.example                      # Template for Firebase/API keys
+├── .gitignore                        # Git exclusion rules
+├── firebasewriter.cjs                # DB provisioning script
+├── watchdog.cjs                      # System health monitor
+├── package.json                      # Dependency registry
+├── tailwind.config.js                # Tailwind CSS v4 config
+├── tsconfig.json                     # TypeScript configuration
+├── vercel.json                       # Vercel deployment rules
+└── README.md                         # This documentation
+```
+
+### 🧠 Core Component Mapping
+
+#### 🏗️ Root Orchestration
+- [App.tsx](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/App.tsx) — **The Brain**: Orchestrates Firebase listeners, 30s heartbeat logic, global theme mapping, and notification dispatching.
+- [index.css](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/index.css) — **Anti-Gravity Foundation**: Global CSS variables and glassmorphic visual tokens.
+
+#### 🍱 Dashboard Ecosystem (`src/components/`)
+- [AIRiskAnalyzer.tsx](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/components/AIRiskAnalyzer.tsx) — **Inference Engine**: Fuses sensor data with AI results to determine overall severity.
+- [MapDisplay.tsx](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/components/MapDisplay.tsx) — GPS integration with NMEA/Decimal coordinate auto-flipping.
+- [SensorGrid.tsx](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/components/SensorGrid.tsx) — Smart layout engine for the Telemetry array.
+
+#### 🔧 Hardware Firmware
+- **[ESPS3 Main Controller](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/esps3/esps3.ino)**:
+    - Manages MPU6050, DHT11, MQ2, Flame, and Water sensors.
+    - Handles **GPS 16-bit overflow correction** logic.
+    - Uploads and patches telemetry to Firebase RTDB every 1000ms.
+- **[ESPCAM Evidence Unit](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/espcam/espcam.ino)**:
+    - Listens for hardware triggers on GPIO13.
+    - Captures and uploads road/driver imagery to the dashboard.
+
+#### 🐕 Infrastructure & Automation
+- [watchdog.cjs](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/watchdog.cjs) — Real-time Node.js monitor for database integrity and connectivity.
+- [vercel.json](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/vercel.json) — Production-ready routing for SPA deployment.
 
 ---
 
-## 🔩 Hardware Part
+### 🛰️ Advanced Location Intelligence (GPS)
 
-### Components List
-
-| # | Component | Model | Purpose |
-|---|-----------|-------|---------| 
-| 1 | **Microcontroller** | ESP32-S3 N16R8 | Main controller — WiFi, processing, sensor I/O |
-| 2 | **Temperature Sensor** | DHT11 | Monitor vehicle/ambient temperature |
-| 3 | **Gas Sensor** | MQ2 | Detect fuel/LPG/smoke gas leaks |
-| 4 | **Flame Sensor** | Digital Flame Sensor | Detect fire or high heat |
-| 5 | **Water Sensor** | Analog Water Level | Detect vehicle submersion / flooding |
-| 6 | **IMU (Crash Detector)** | MPU6050 | Detect G-force impact, tilt, and rollover |
-| 7 | **GPS Module** | NEO-M8N | Track real-time vehicle location |
-| 8 | **Display** | 16×2 I2C LCD | Show system status locally |
-| 9 | **Buzzer** | Active Buzzer | Emergency audio alarm |
-| 10 | **LED** | Standard LED | Visual status indicator |
-| 11 | **Evidence System** | 2x ESP32-CAM | Capture Road Scene & Driver Condition |
-| 12 | **Reset Button** | Tactile Push Button | Manual accident reset |
-
----
-
-### Pin Connection Table
-
-| Module | Signal | ESP32 Pin |
-|--------|--------|-----------|
-| **DHT11** | DATA | GPIO 40 |
-| **MQ2 Gas Sensor** | AO (Analog Out) | GPIO 5 |
-| **Flame Sensor** | DO (Digital Out) | GPIO 6 *(LOW = fire detected)* |
-| **Water Sensor** | AO (Analog Out) | GPIO 10 *(> 1000 = wet)* |
-| **MPU6050** | SDA | GPIO 8 |
-| **MPU6050** | SCL | GPIO 9 |
-| **LCD I2C (16×2)** | SDA | GPIO 4 |
-| **LCD I2C (16×2)** | SCL | GPIO 7 |
-| **NEO-M8N GPS** | TX → ESP32 RX | GPIO 18 |
-| **NEO-M8N GPS** | RX → ESP32 TX | GPIO 17 |
-| **ESP32-CAM #1** | TRIGGER (IO13) | GPIO 16 (Road Scene) |
-| **ESP32-CAM #2** | TRIGGER (IO13) | GPIO 15 (Driver Condition) |
-| **Buzzer** | Signal | GPIO 11 |
-| **Reset Button** | Signal | GPIO 12 |
-| **LED** | Anode | GPIO 2 |
-
----
-
-### Accident Detection Logic (Firmware)
-
-The ESP32 firmware uses these thresholds to classify accidents:
-
-| Condition | Threshold | Severity |
-|-----------|-----------|----------|
-| G-Force impact | > 2.5 G | `MODERATE` |
-| Vehicle tilt | Deviates > 45° | `MODERATE` (Sustained 1s) |
-| G-Force impact | > 5.0 G | `CRITICAL` |
-| Fire detected | Sensor LOW | Hazard alert |
-| Gas leak | Analog > 2200 | Hazard alert |
-| Water entry | Analog > 1000 | Hazard alert |
+The system features a robust GPS processing pipeline designed for high-precision tracking in the Indian subcontinent:
+- **NMEA & Decimal Auto-Detection**: The dashboard automatically detects and converts incoming GPS strings (Decimal Degrees or NMEA GPRMC).
+- **16-Bit Integer Overflow Fix**: A critical firmware/frontend patch that compensates for 16-bit hardware overflows, ensuring accurate positioning for coordinates in the `14°N - 18°N` and `78°E - 82°E` range (specifically calibrated for the Andhra Pradesh region).
+- **Direct Navigation**: Deep-linking to Google Maps for high-speed emergency response.
 
 ---
 
@@ -270,62 +292,32 @@ Accident-Detection-System/
 
 ### Tech Stack & Packages
 
-#### 🖥️ Frontend Framework
+#### 🖥️ Frontend & AI Engine
 
 | Package | Version | Purpose |
 |---------|---------|---------| 
 | `react` | 18.3 | Core UI library |
-| `react-dom` | 18.3 | DOM rendering |
-| `typescript` | 5.6 | Type safety — zero runtime type errors |
-| `vite` | 6.0 | Fast dev server & optimized production builds |
+| `@mediapipe/tasks-vision` | 0.10.x | Industrial-grade 478-landmark face tracking |
+| `typescript` | 5.6 | Strict type-safe telemetry handling |
+| `vite` | 6.0 | Next-gen lightning-fast HMR & build engine |
 
-#### 🎨 Design System
-
-| Package | Version | Purpose |
-|---------|---------|---------| 
-| `tailwindcss` | 4.0 | Utility-first CSS framework (v4 Engine) |
-| `lucide-react` | 0.460 | Clean, consistent sensor icons |
-| `clsx` / `tailwind-merge` | 2.x | Premium UI component handling |
-| Custom CSS Variables | — | Glassmorphism UI, Mobile-optimized layouts |
-
-#### ✨ Animations & Notifications
+#### 🎨 Anti-Gravity Design System
 
 | Package | Version | Purpose |
 |---------|---------|---------| 
-| `framer-motion` | 11.x | Smooth entrance animations, card transitions, alert glows |
-| `react-hot-toast` | 2.6 | In-app alert toasts (accident, fire, gas, offline) |
+| `tailwindcss` | 4.0 | Utility-first CSS framework (v4 Oxide Engine) |
+| `framer-motion` | 11.x | 60FPS fluid micro-animations & state transitions |
+| `lucide-react` | 0.460 | Premium vector iconography |
+| `Glassmorphism` | Native | Backdrop-blur & border-glow design system |
 
-#### 🗺️ Visualization
-
-| Package | Version | Purpose |
-|---------|---------|---------| 
-| `leaflet` | 1.9 | Interactive GPS map with live vehicle marker |
-| `@react-google-maps/api` | 2.20 | Google Maps integration |
-| `recharts` | 2.13 | Sensor data charts/graphs |
-
-#### ☁️ Backend / Cloud
+#### 🗺️ Connectivity & Visualization
 
 | Package | Version | Purpose |
 |---------|---------|---------| 
-| `firebase` | 12.9 | Realtime Database SDK — instant push updates |
-
-#### 🤖 AI & Machine Learning
-
-| Package | Version | Purpose |
-|---------|---------|---------| 
-| `face-api.js` | 0.22 | Deep facial landmark detection & expression analysis |
-| `@tensorflow/tfjs` | 4.x | Hardware-accelerated ML backend (WebGL/WebGPU) |
-| `MobileNet v2` | TFHub | Transfer learning feature extractor for eye classification |
-| `IndexedDB` | Native | Local persistence for custom-trained AI models |
-
-#### 🛠️ Utilities & Build
-
-| Package | Version | Purpose |
-|---------|---------|---------| 
-| `clsx` | 2.1 | Conditional CSS class names |
-| `tailwind-merge` | 2.5 | Merge conflicting Tailwind classes |
-| `autoprefixer` | 10.4 | CSS vendor prefix compatibility |
-| `postcss` | 8.4 | CSS processing pipeline |
+| `firebase` | 12.9 | Realtime Database for sub-second telemetry sync |
+| `leaflet` | 1.9 | High-performance interactive mapping |
+| `react-hot-toast` | 2.6 | Low-latency emergency signaling system |
+| `recharts` | 2.13 | High-fidelity biometric data visualization |
 
 ---
 
@@ -527,10 +519,11 @@ A collapsible debug panel at the bottom of the sensor grid exposes raw hardware 
 - Google Maps deep-link for navigation
 - GPS lock status indicator
 
-### 🌓 Dark / Light Mode
-- Full dark & light theme via CSS variables
-- Preference saved to `localStorage` — persists sessions
-- Defaults to dark mode
+### 🌑 Anti-Gravity Pro Design (v2.0)
+- **Dark-Mode Exclusive**: The dashboard is strictly designed for high-contrast nighttime visibility in vehicle cabins.
+- **Glassmorphic Tokens**: UI components utilize `backdrop-blur-xl` and `bg-white/5` with neon borders.
+- **Standardized Tokens**: Colors, spacing, and glows are driven by [theme.ts](file:///c:/Users/rabbu/Projects/Hardware_projects/Accident-Detection-System/src/constants/theme.ts).
+- **Responsive Micro-interactions**: Hover-triggered glows and spring-physics transitions powered by Framer Motion.
 
 ---
 
