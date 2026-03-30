@@ -1,16 +1,14 @@
-import { Radio, Sun, Moon } from 'lucide-react';
+import { Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface HeaderProps {
     status: string;
     isCritical: boolean;
-    isDark: boolean;
-    onToggleTheme: () => void;
     buttonPressed: boolean;
     accidentDetected: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ status, isCritical, isDark, onToggleTheme }) => {
+const Header: React.FC<HeaderProps> = ({ status, isCritical }) => {
     const isOnline = status === "ONLINE";
 
     return (
@@ -62,32 +60,6 @@ const Header: React.FC<HeaderProps> = ({ status, isCritical, isDark, onToggleThe
                             {isOnline ? "Online" : "Offline"}
                         </span>
                     </motion.div>
-
-                    {/* Theme Toggle Button */}
-                    <button
-                        onClick={onToggleTheme}
-                        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                        title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                        className="p-2.5 rounded-2xl border transition-all duration-300 hover:scale-105 active:scale-95"
-                        style={{
-                            borderColor: 'var(--border-color)',
-                            backgroundColor: 'var(--bg-card)',
-                            color: 'var(--text-secondary)',
-                        }}
-                        onMouseEnter={e => {
-                            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent-blue)';
-                            (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent-blue)';
-                        }}
-                        onMouseLeave={e => {
-                            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-color)';
-                            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-                        }}
-                    >
-                        {isDark
-                            ? <Sun className="w-4 h-4 transition-transform duration-300 hover:rotate-12" />
-                            : <Moon className="w-4 h-4 transition-transform duration-300 hover:-rotate-12" />
-                        }
-                    </button>
                 </div>
 
             </div>

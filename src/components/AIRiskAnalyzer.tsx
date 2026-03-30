@@ -29,7 +29,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
                 activeRules: ["OFFLINE MODE"],
                 sensorWeights: [
                     { name: "Fire", normalizedValue: 0, weight: 0, suppressed: false },
-                    { name: "Gas Leak", normalizedValue: 0, weight: 0, suppressed: false },
+                    // { name: "Gas Leak", normalizedValue: 0, weight: 0, suppressed: false },
                     { name: "Thermal", normalizedValue: 0, weight: 0, suppressed: false },
                     { name: "Submersion", normalizedValue: 0, weight: 0, suppressed: false },
                     { name: "Tilt Angle", normalizedValue: 0, weight: 0, suppressed: false },
@@ -44,7 +44,8 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
         
         // 1. Normalize values
         const normFire = s.fire ? 1.0 : 0.0;
-        const normGas = s.gas_leak ? 1.0 : 0.0;
+        // const normGas = s.gas_leak ? 1.0 : 0.0;
+        // const normGas = 0.0;
         const normTemp = Math.max(0, Math.min(1, (s.temperature - 25) / 55));
         const normWater = s.water_detected ? 1.0 : 0.0;
         const normTilt = Math.max(0, Math.min(1, Math.abs(s.tilt_angle) / 90));
@@ -54,7 +55,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
         let riskScore = 0;
         const weights = {
             fire: 0.30,
-            gas: 0.25,
+            // gas: 0.25,
             temp: 0.15,
             water: 0.15,
             tilt: 0.10,
@@ -63,7 +64,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
 
         const suppression: Record<string, { suppressed: boolean; reason?: string }> = {
             fire: { suppressed: false },
-            gas: { suppressed: false },
+            // gas: { suppressed: false },
             temp: { suppressed: false },
             water: { suppressed: false },
             tilt: { suppressed: false },
@@ -71,7 +72,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
         };
 
         // RULE 8: MULTI-HAZARD (3+ sensors)
-        const activeCount = [s.fire, s.gas_leak, s.water_detected, s.temperature > 55, Math.abs(s.tilt_angle) > 35].filter(Boolean).length;
+        const activeCount = [s.fire, /* s.gas_leak, */ s.water_detected, s.temperature > 55, Math.abs(s.tilt_angle) > 35].filter(Boolean).length;
         
         if (activeCount >= 3) {
             situation = "MULTI-HAZARD EMERGENCY";
@@ -79,7 +80,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
             activeRules.push("RULE 8: CATASTROPHIC MULTI-HAZARD");
         } else {
             // Apply Rule 1-7
-            if (s.fire && s.gas_leak) {
+            if (false /* s.fire && s.gas_leak */) {
                 situation = "VEHICLE FIRE & EXPLOSION RISK";
                 riskScore = 1.0;
                 suppression.temp = { suppressed: true, reason: "Fire Override" };
@@ -90,7 +91,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
                 riskScore = 0.85;
                 suppression.temp = { suppressed: true, reason: "Fire Overrides Temp" };
                 activeRules.push("RULE 2: FIRE PRIORITY");
-            } else if (s.water_detected && !s.fire && !s.gas_leak) {
+            } else if (s.water_detected && !s.fire /* && !s.gas_leak */) {
                 if (Math.abs(s.tilt_angle) > 30) {
                     situation = "VEHICLE SUBMERGED — ROLLOVER";
                     riskScore = 0.95;
@@ -98,16 +99,16 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
                 } else {
                     situation = "WATER INGRESS / SUBMERSION";
                     weights.temp = 0.05; // Reduced temp weight
-                    suppression.gas = { suppressed: true, reason: "Underwater Gas Unreliable" };
+                    // suppression.gas = { suppressed: true, reason: "Underwater Gas Unreliable" };
                     activeRules.push("RULE 3: SUBMERSION LOGIC");
                 }
-            } else if (s.gas_leak && !s.fire) {
+            } else if (false /* s.gas_leak && !s.fire */) {
                 situation = "GAS LEAK DETECTED";
                 riskScore = 0.70;
                 suppression.temp = { suppressed: true, reason: "Gas Ignore Temp" };
                 suppression.water = { suppressed: true, reason: "Gas Priority" };
                 activeRules.push("RULE 5: GAS LEAK PRIMARY");
-            } else if (s.temperature > 55 && !s.fire && !s.gas_leak) {
+            } else if (s.temperature > 55 && !s.fire /* && !s.gas_leak */) {
                 situation = "THERMAL OVERHEAT";
                 activeRules.push("RULE 6: CRITICAL OVERHEAT");
             } else if (Math.abs(s.tilt_angle) > 45 && !s.water_detected) {
@@ -137,7 +138,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
 
                 const sensorMap = [
                     { name: "fire", val: normFire, w: weights.fire },
-                    { name: "gas", val: normGas, w: weights.gas },
+                    // { name: "gas", val: normGas, w: weights.gas },
                     { name: "temp", val: normTemp, w: weights.temp },
                     { name: "water", val: normWater, w: weights.water },
                     { name: "tilt", val: normTilt, w: weights.tilt },
@@ -158,7 +159,7 @@ const AIRiskAnalyzer: React.FC<AIRiskAnalyzerProps> = ({ data, biometricResult, 
 
         const sensorWeights = [
             { name: "Fire", normalizedValue: normFire, weight: weights.fire, suppressed: suppression.fire.suppressed, suppressReason: suppression.fire.reason },
-            { name: "Gas Leak", normalizedValue: normGas, weight: weights.gas, suppressed: suppression.gas.suppressed, suppressReason: suppression.gas.reason },
+            // { name: "Gas Leak", normalizedValue: normGas, weight: weights.gas, suppressed: suppression.gas.suppressed, suppressReason: suppression.gas.reason },
             { name: "Thermal", normalizedValue: normTemp, weight: weights.temp, suppressed: suppression.temp.suppressed, suppressReason: suppression.temp.reason },
             { name: "Submersion", normalizedValue: normWater, weight: weights.water, suppressed: suppression.water.suppressed, suppressReason: suppression.water.reason },
             { name: "Tilt Angle", normalizedValue: normTilt, weight: weights.tilt, suppressed: suppression.tilt.suppressed, suppressReason: suppression.tilt.reason },

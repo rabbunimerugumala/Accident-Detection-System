@@ -11,6 +11,7 @@ import SensorGrid from './components/SensorGrid';
 import MapDisplay from './components/MapDisplay';
 import AIRiskAnalyzer from './components/AIRiskAnalyzer';
 import Footer from './components/Footer';
+import { theme } from './constants/theme';
 // EmergencyBanner disabled for now
 // import EmergencyBanner from './components/EmergencyBanner';
 
@@ -36,11 +37,11 @@ const INITIAL_STATE: FirebaseData['accidentState'] = {
         captured_at: 0,
         accident_id: ""
     },
-    location: { gps_fix: false, latitude: 0, longitude: 0 },
+    location: { gps_fix: false, latitude: 16.5171954, longitude: 80.6994188 },
     online: false,
     sensors: {
         fire: false,
-        gas_leak: false,
+        // gas_leak: false,
         gforce: 0,
         temperature: 0,
         tilt_angle: 0,
@@ -63,29 +64,35 @@ function usePrevious<T>(value: T): T | undefined {
 const App: React.FC = () => {
     const [data, setData] = useState<FirebaseData['accidentState']>(INITIAL_STATE);
     const [status, setStatus] = useState("CONNECTING...");
-    const [isDark, setIsDark] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('theme');
-            return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        }
-        return true; // Default to dark for Pro version
-    });
 
     const [biometricResult, setBiometricResult] = useState<VictimSeverityData | null>(null);
 
     const prevData = usePrevious(data);
     const lastSeenRef = useRef<{ ts: number, lastAdvance: number }>({ ts: -1, lastAdvance: Date.now() });
 
-    // Theme Management
+    // Theme Management - Driven strictly by the constants/theme.ts object
     useEffect(() => {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDark]);
+        document.documentElement.classList.add('dark');
+        
+        // Map JS theme to foundational CSS variables
+        const root = document.documentElement;
+        root.style.setProperty('--bg-main', theme.colors.background);
+        root.style.setProperty('--bg-card', theme.colors.card);
+        root.style.setProperty('--bg-header', theme.colors.surface);
+        
+        root.style.setProperty('--text-main', theme.colors.textPrimary);
+        root.style.setProperty('--text-secondary', theme.colors.textSecondary);
+        root.style.setProperty('--text-muted', theme.colors.textSecondary);
+        
+        root.style.setProperty('--border-color', theme.colors.border);
+        root.style.setProperty('--border-hover', theme.colors.neonBlue);
+        
+        root.style.setProperty('--accent-emerald', theme.colors.success);
+        root.style.setProperty('--accent-blue', theme.colors.neonBlue);
+        root.style.setProperty('--accent-amber', theme.colors.warning);
+        root.style.setProperty('--accent-rose', theme.colors.danger);
+        root.style.setProperty('--accent-cyan', theme.colors.neonCyan);
+    }, []);
 
 
     // Browser Notification Permission
@@ -105,7 +112,7 @@ const App: React.FC = () => {
                 // Double nesting check
                 const state = rawData.accidentState || rawData;
 
-                if (state && typeof state === 'object' && 'timestamp' in state) {
+                if (state && typeof state === 'object') {
                     // Critical Fix: Firebase data has `evidence` at the root of `rawData`, 
                     // not inside the nested `accidentState` node. We must merge it back in.
                     const mergedData = {
@@ -117,10 +124,8 @@ const App: React.FC = () => {
                     setStatus("ONLINE");
 
                     // Always refresh lastAdvance on ANY Firebase update.
-                    // Previously only updated when timestamp changed — this caused
-                    // false OFFLINE when ESP32 sent data without changing the timestamp.
                     const now = Date.now();
-                    lastSeenRef.current = { ts: mergedData.timestamp, lastAdvance: now };
+                    lastSeenRef.current = { ts: (mergedData as any).timestamp || -1, lastAdvance: now };
                 }
             }
         }, (error) => {
@@ -182,7 +187,7 @@ const App: React.FC = () => {
 
         // Hazard Sensors
         if (data.sensors.fire && !prevData.sensors.fire) notify("FIRE ALERT", "Smoke or Flame detected in vehicle!", 'error');
-        if (data.sensors.gas_leak && !prevData.sensors.gas_leak) notify("GAS LEAK", "Dangerous gas levels detected!", 'error');
+        // if (data.sensors.gas_leak && !prevData.sensors.gas_leak) notify("GAS LEAK", "Dangerous gas levels detected!", 'error');
         if (data.sensors.water_detected && !prevData.sensors.water_detected) notify("SUBMERSION ALERT", "Vehicle water entry detected!", 'error');
 
         // Button Latch ON — reset acknowledged (only fires on false → true)
@@ -225,8 +230,6 @@ const App: React.FC = () => {
                 <Header
                     status={status}
                     isCritical={isCritical}
-                    isDark={isDark}
-                    onToggleTheme={() => setIsDark(!isDark)}
                     buttonPressed={data.button_pressed}
                     accidentDetected={data.accident.detected}
                 />

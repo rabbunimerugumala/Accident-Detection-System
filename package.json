@@ -11,10 +11,9 @@
     "start": "concurrently --names \"UI,WATCHDOG\" --prefix-colors \"cyan,yellow\" \"vite\" \"node watchdog.cjs\""
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.34",
     "@react-google-maps/api": "^2.20.8",
-    "@tensorflow/tfjs": "^4.22.0",
     "clsx": "^2.1.1",
-    "face-api.js": "^0.22.2",
     "firebase": "^12.9.0",
     "framer-motion": "^11.11.17",
     "leaflet": "^1.9.4",

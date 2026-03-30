@@ -16,9 +16,11 @@ export interface VictimSeverityData {
   eyeStatus: 'OPEN' | 'CLOSED' | 'BLINKING' | 'UNKNOWN';
   expressions: FaceExpressions | null;
   confidence: number;
+  accuracy: number;
   analyzing: boolean;
   timestamp: number;
   error?: string;
+  landmarks?: any; // MediaPipe NormalizedLandmarks
 }
 
 export interface ExtendedEvidence {

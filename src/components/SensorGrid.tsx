@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Flame, Wind, Droplets, Zap, RotateCw,
+    Flame, /* Wind, */ Droplets, Zap, RotateCw,
     Thermometer, Bug
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +26,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
     const rawSensors = data.sensors;
     const sensors = isOnline ? rawSensors : {
         fire: false,
-        gas_leak: false,
+        // gas_leak: false,
         gforce: 0,
         temperature: 0,
         tilt_angle: 0,
@@ -122,7 +122,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
                 />
             </motion.div>
 
-            {/* GAS LEAK */}
+            {/* GAS LEAK - COMMENTED OUT 
             <motion.div variants={item}>
                 <SensorCard
                     title="Atmosphere"
@@ -136,6 +136,7 @@ const SensorGrid: React.FC<SensorGridProps> = ({ data, status, buttonRaw, showOn
                     percentage={sensors.gas_leak ? 100 : 0}
                 />
             </motion.div>
+            */}
 
             {/* SUBMERSION */}
             <motion.div variants={item}>

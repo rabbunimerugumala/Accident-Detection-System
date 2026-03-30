@@ -26,7 +26,7 @@ export interface FirebaseData {
         online: boolean;
         sensors: {
             fire: boolean;
-            gas_leak: boolean;
+            // gas_leak: boolean;
             gforce: number;
             temperature: number;
             tilt_angle: number;
@@ -41,15 +41,27 @@ export interface FirebaseData {
     };
 }
 
+export interface FaceExpressions {
+  neutral: number;
+  happy: number;
+  sad: number;
+  angry: number;
+  fearful: number;
+  disgusted: number;
+  surprised: number;
+}
+
 export interface VictimSeverityData {
   severity: 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH';
   consciousness: 'CONSCIOUS' | 'UNCONSCIOUS' | 'UNCERTAIN';
   eyeStatus: 'OPEN' | 'CLOSED' | 'BLINKING' | 'UNKNOWN';
-  expressions: any | null;
+  expressions: FaceExpressions | null;
   confidence: number;
+  accuracy: number;
   analyzing: boolean;
   timestamp: number;
   error?: string;
+  landmarks?: any;
 }
 
 export interface AIAnalysisResult {

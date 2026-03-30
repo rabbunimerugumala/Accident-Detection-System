@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Maximize2, MapPin } from 'lucide-react';
+import { Maximize2, MapPin, Target } from 'lucide-react';
 
 interface MapDisplayProps {
     latitude: number;
@@ -32,8 +32,8 @@ const redIcon = new L.Icon({
 // ─── DEFAULT FALLBACK LOCATION ───────────────────────────────────────────────
 // Used when gps_fix === false (device offline or GPS not acquired yet).
 // Replace these values with your default/home location.
-const FALLBACK_LAT = 14.2262; // ← change latitude here
-const FALLBACK_LNG = 79.1384;  // ← change longitude here
+const FALLBACK_LAT = 16.5171954; // ← change latitude here
+const FALLBACK_LNG = 80.6994188;  // ← change longitude here
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDetected, gpsFix, status }) => {
@@ -103,6 +103,15 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDe
 
     const googleMapsUrl = `https://www.google.com/maps?q=${displayLat},${displayLng}`;
 
+    const handleZoomToLocation = () => {
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([displayLat, displayLng], 18, {
+                animate: true,
+                duration: 1
+            });
+        }
+    };
+
     return (
         <div className="glass-card overflow-hidden !p-0 border border-color shadow-2xl relative flex flex-col h-[350px] md:h-[480px]">
             <div className="p-3 sm:p-4 border-b border-color flex items-center justify-between bg-white/5 z-10">
@@ -119,6 +128,14 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, accidentDe
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {/* Zoom to Location */}
+                    <button
+                        onClick={handleZoomToLocation}
+                        className={`p-2 rounded-xl transition-all duration-300 ${accidentDetected ? 'bg-rose-500/20 text-rose-400 animate-pulse' : 'hover:bg-primary/10 text-primary'}`}
+                        title="Zoom to Vehicle"
+                    >
+                        <Target className="w-4 h-4" />
+                    </button>
                     {/* Open in Google Maps — always visible */}
                     <button
                         onClick={() => window.open(googleMapsUrl, '_blank')}
