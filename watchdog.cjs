@@ -1,8 +1,9 @@
 /**
  * LifeGuardX - Firebase Timestamp Watchdog
  * 
- * This script watches the `timestamp` field in Firebase.
- * If the timestamp stops advancing for 10 seconds (ESP32 is offline),
+ * This script serves as a 30-second heartbeat to detect online/offline state.
+ * It watches the `timestamp` field in Firebase.
+ * If the timestamp stops advancing (ESP32 is offline),
  * it writes zeros/safe-defaults back to the database — same as the UI shows.
  * 
  * Run with: node watchdog.cjs
